@@ -1,6 +1,7 @@
 import postgres from "postgres";
+import { defaultProjects } from "./project-data";
 import { seedData } from "./seed";
-import type { BlogPost, Moment, SiteData, TodoItem, WorkItem } from "./types";
+import type { BlogPost, Moment, ProjectItem, SiteData, TodoItem, WorkItem } from "./types";
 
 const connectionString = process.env.DATABASE_URL;
 const sql = connectionString ? postgres(connectionString, { ssl: "require" }) : null;
@@ -72,6 +73,109 @@ async function ensureSchema() {
   `;
 
   await sql`alter table blog_posts add column if not exists cover_image_url text`;
+
+  await sql`
+    create table if not exists projects (
+      id serial primary key,
+      title text not null,
+      slug text not null unique,
+      period text not null,
+      type text,
+      role text,
+      summary text not null,
+      description text,
+      content jsonb,
+      tech_stack text[] not null default '{}',
+      cover_image text,
+      repo_url text,
+      demo_url text,
+      sort_order integer not null default 0,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    )
+  `;
+
+  await seedEmptyTables();
+}
+
+async function seedEmptyTables() {
+  if (!sql) return;
+
+  const [momentCount] = await sql<{ count: string }[]>`select count(*)::text as count from moments`;
+  if (Number(momentCount.count) === 0) {
+    for (const item of seedData.moments) {
+      await sql`
+        insert into moments (title, date, tag, content, image_url, link_url)
+        values (${item.title || null}, ${item.date}, ${item.tag}, ${item.content}, ${item.imageUrl || null}, ${item.linkUrl || null})
+      `;
+    }
+  }
+
+  const [todoCount] = await sql<{ count: string }[]>`select count(*)::text as count from todos`;
+  if (Number(todoCount.count) === 0) {
+    for (const item of seedData.todos) {
+      await sql`
+        insert into todos (category, title, status)
+        values (${item.category}, ${item.title}, ${item.status})
+      `;
+    }
+  }
+
+  const [workCount] = await sql<{ count: string }[]>`select count(*)::text as count from works`;
+  if (Number(workCount.count) === 0) {
+    for (const item of seedData.works) {
+      await sql`
+        insert into works (type, title, creator, status, date, note, reflection, cover_image_url, blog_url)
+        values (
+          ${item.type},
+          ${item.title},
+          ${item.creator || null},
+          ${item.status},
+          ${item.date || null},
+          ${item.note || null},
+          ${item.reflection || null},
+          ${item.coverImageUrl || null},
+          ${item.blogUrl || null}
+        )
+      `;
+    }
+  }
+
+  const [blogCount] = await sql<{ count: string }[]>`select count(*)::text as count from blog_posts`;
+  if (Number(blogCount.count) === 0) {
+    for (const item of seedData.blogPosts) {
+      await sql`
+        insert into blog_posts (title, slug, date, category, summary, content, cover_image_url)
+        values (${item.title}, ${item.slug}, ${item.date}, ${item.category}, ${item.summary}, ${item.content || null}, ${item.coverImageUrl || null})
+        on conflict (slug) do nothing
+      `;
+    }
+  }
+
+  const [projectCount] = await sql<{ count: string }[]>`select count(*)::text as count from projects`;
+  if (Number(projectCount.count) === 0) {
+    for (const item of defaultProjects) {
+      await sql`
+        insert into projects (title, slug, period, type, role, summary, description, content, tech_stack, cover_image, repo_url, demo_url, sort_order)
+        values (
+          ${item.title},
+          ${item.slug},
+          ${item.period},
+          ${item.type || null},
+          ${item.role || null},
+          ${item.summary},
+          ${item.description || null},
+          ${sql.json(item.content || [])},
+          ${item.techStack},
+          ${item.coverImage || null},
+          ${item.repoUrl || null},
+          ${item.demoUrl || null},
+          ${item.sortOrder || 0}
+        )
+        on conflict (slug) do nothing
+      `;
+    }
+  }
 }
 
 export async function getSiteData(): Promise<SiteData> {
@@ -233,6 +337,7 @@ export async function updateTodoStatus(id: number, status: TodoItem["status"]) {
     where id = ${id}
     returning id, category, title, status, updated_at::text as "updatedAt"
   `;
+  if (!todo) throw new Error("Todo not found.");
   return todo;
 }
 
@@ -260,5 +365,152 @@ export async function updateWork(input: Pick<WorkItem, "id" | "status"> & Partia
       blog_url as "blogUrl",
       updated_at::text as "updatedAt"
   `;
+  if (!work) throw new Error("Work item not found.");
   return work;
+}
+
+export async function deleteContent(type: "moment" | "todo" | "work" | "blog", id: number | string) {
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureSchema();
+
+  if (type === "moment") {
+    const [deleted] = await sql`delete from moments where id = ${Number(id)} returning id`;
+    if (!deleted) throw new Error("Moment not found.");
+    return deleted;
+  }
+
+  if (type === "todo") {
+    const [deleted] = await sql`delete from todos where id = ${Number(id)} returning id`;
+    if (!deleted) throw new Error("Todo not found.");
+    return deleted;
+  }
+
+  if (type === "work") {
+    const [deleted] = await sql`delete from works where id = ${Number(id)} returning id`;
+    if (!deleted) throw new Error("Work item not found.");
+    return deleted;
+  }
+
+  const [deleted] = await sql`
+    delete from blog_posts
+    where id::text = ${String(id)} or slug = ${String(id)}
+    returning id
+  `;
+  if (!deleted) throw new Error("Blog post not found.");
+  return deleted;
+}
+
+function mapProject(row: any): ProjectItem {
+  return {
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    period: row.period,
+    type: row.type,
+    role: row.role,
+    summary: row.summary,
+    description: row.description,
+    content: row.content || [],
+    techStack: row.techStack || [],
+    coverImage: row.coverImage,
+    repoUrl: row.repoUrl,
+    demoUrl: row.demoUrl,
+    sortOrder: row.sortOrder
+  };
+}
+
+export async function getProjects(): Promise<ProjectItem[]> {
+  if (!sql) return defaultProjects;
+  await ensureSchema();
+  const rows = await sql<any[]>`
+    select
+      id,
+      title,
+      slug,
+      period,
+      type,
+      role,
+      summary,
+      description,
+      content,
+      tech_stack as "techStack",
+      cover_image as "coverImage",
+      repo_url as "repoUrl",
+      demo_url as "demoUrl",
+      sort_order as "sortOrder"
+    from projects
+    order by sort_order asc, period asc, id asc
+  `;
+  return rows.map(mapProject);
+}
+
+export async function getProjectBySlug(slug: string) {
+  const projects = await getProjects();
+  return projects.find((project) => project.slug === slug || String(project.id) === slug) || null;
+}
+
+export async function createProject(input: Omit<ProjectItem, "id">) {
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureSchema();
+  const [project] = await sql<any[]>`
+    insert into projects (title, slug, period, type, role, summary, description, content, tech_stack, cover_image, repo_url, demo_url, sort_order)
+    values (
+      ${input.title},
+      ${input.slug},
+      ${input.period},
+      ${input.type || null},
+      ${input.role || null},
+      ${input.summary},
+      ${input.description || null},
+      ${sql.json(input.content || [])},
+      ${input.techStack || []},
+      ${input.coverImage || null},
+      ${input.repoUrl || null},
+      ${input.demoUrl || null},
+      ${input.sortOrder || 0}
+    )
+    returning
+      id, title, slug, period, type, role, summary, description, content,
+      tech_stack as "techStack", cover_image as "coverImage", repo_url as "repoUrl",
+      demo_url as "demoUrl", sort_order as "sortOrder"
+  `;
+  return mapProject(project);
+}
+
+export async function updateProject(id: number | string, input: Omit<ProjectItem, "id">) {
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureSchema();
+  const [project] = await sql<any[]>`
+    update projects
+    set
+      title = ${input.title},
+      slug = ${input.slug},
+      period = ${input.period},
+      type = ${input.type || null},
+      role = ${input.role || null},
+      summary = ${input.summary},
+      description = ${input.description || null},
+      content = ${sql.json(input.content || [])},
+      tech_stack = ${input.techStack || []},
+      cover_image = ${input.coverImage || null},
+      repo_url = ${input.repoUrl || null},
+      demo_url = ${input.demoUrl || null},
+      sort_order = ${input.sortOrder || 0},
+      updated_at = now()
+    where id = ${Number(id)}
+    returning
+      id, title, slug, period, type, role, summary, description, content,
+      tech_stack as "techStack", cover_image as "coverImage", repo_url as "repoUrl",
+      demo_url as "demoUrl", sort_order as "sortOrder"
+  `;
+  if (!project) throw new Error("Project not found.");
+  return mapProject(project);
+}
+
+export async function deleteProject(id: number | string) {
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureSchema();
+  const [deleted] = await sql`delete from projects where id = ${Number(id)} returning id`;
+  if (!deleted) throw new Error("Project not found.");
+  return deleted;
 }

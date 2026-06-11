@@ -49,3 +49,27 @@ export type SiteData = {
   works: WorkItem[];
   blogPosts: BlogPost[];
 };
+
+export type ProjectItem = {
+  id: number | string;
+  title: string;
+  slug: string;
+  period: string;
+  type?: string | null;
+  role?: string | null;
+  summary: string;
+  description?: string | null;
+  content?: ProjectSection[] | null;
+  techStack: string[];
+  coverImage?: string | null;
+  repoUrl?: string | null;
+  demoUrl?: string | null;
+  sortOrder?: number;
+};
+
+export type ProjectSection = {
+  title: string;
+  body?: string;
+  items?: string[];
+  metrics?: Array<{ label: string; value: string; note?: string }>;
+};

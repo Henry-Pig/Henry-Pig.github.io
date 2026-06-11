@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { Nav } from "../../../components/Nav";
 import { MarkdownView } from "../../../components/MarkdownView";
 import { getSiteData } from "../../../lib/db";
@@ -15,7 +14,21 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
   const data = await getSiteData();
   const post = data.blogPosts.find((item) => item.slug === slug);
 
-  if (!post) notFound();
+  if (!post) {
+    return (
+      <>
+        <Nav active="blog" />
+        <main className="page-main">
+          <article className="page-hero shell blog-article">
+            <p className="eyebrow">Blog</p>
+            <h1>文章暂时没有找到</h1>
+            <p className="muted-text">可能是链接里的 slug 变化了，或者文章已经被删除。</p>
+            <Link className="button button-secondary" href="/blog">返回博客列表</Link>
+          </article>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>

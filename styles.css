@@ -358,6 +358,29 @@
   margin: 18px auto;
 }
 
+.moments-center {
+  min-width: 0;
+}
+
+.todo-group li {
+  grid-template-columns: 24px minmax(0, 1fr) auto auto;
+}
+
+.text-danger {
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  color: var(--primary-active);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 6px 0;
+}
+
+.text-danger:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 900px) {
   .admin-grid {
     grid-template-columns: 1fr;

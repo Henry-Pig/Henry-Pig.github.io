@@ -12,7 +12,7 @@ type ApiResult<T> = {
 
 const emptyMoment = { title: "", date: "", tag: "生活", content: "", imageUrl: "", linkUrl: "" };
 const emptyTodo = { category: "想完成的项目", title: "", status: "todo" };
-const emptyWork = { workType: "book", title: "", creator: "", status: "想读", date: "", note: "", reflection: "", coverImageUrl: "", blogUrl: "" };
+const emptyWork = { workType: "book", title: "", creator: "", status: "want", date: "", note: "", reflection: "", coverImageUrl: "", blogUrl: "" };
 const emptyBlog = { title: "", slug: "", date: "", category: "随笔", summary: "", content: "", coverImageUrl: "" };
 
 function useAdmin() {
@@ -67,11 +67,25 @@ async function contentRequest<T>(method: "POST" | "PATCH", token: string, body: 
     },
     body: JSON.stringify(body)
   });
-  const result = (await response.json()) as ApiResult<T>;
+  const text = await response.text();
+  const result = text ? JSON.parse(text) as ApiResult<T> : { success: false, error: "服务器没有返回内容。" };
   if (!response.ok || !result.success) {
     throw new Error(result.error || "请求失败，请稍后再试。");
   }
   return result.data as T;
+}
+
+async function deleteRequest(token: string, type: string, id: number | string) {
+  const response = await fetch(`/api/content?type=${encodeURIComponent(type)}&id=${encodeURIComponent(String(id))}`, {
+    method: "DELETE",
+    headers: { "x-admin-token": token }
+  });
+  const text = await response.text();
+  const result = text ? JSON.parse(text) as ApiResult<{ id: number | string }> : { success: false, error: "服务器没有返回内容。" };
+  if (!response.ok || !result.success) {
+    throw new Error(result.error || "删除失败，请稍后再试。");
+  }
+  return result.data;
 }
 
 function AdminBar({ isAdmin, onLogin, onLogout, actionLabel, onAction }: { isAdmin: boolean; onLogin: () => void; onLogout: () => void; actionLabel: string; onAction: () => void }) {
@@ -172,6 +186,22 @@ function groupedTodos(todos: TodoItem[]) {
   }));
 }
 
+function workStatusLabel(status: string, type: WorkItem["type"]) {
+  const isMovie = type === "movie";
+  const map: Record<string, string> = {
+    want: isMovie ? "想看" : "想读",
+    reading: isMovie ? "在看" : "在读",
+    done: isMovie ? "已看" : "已读",
+    "想读": "想读",
+    "想看": "想看",
+    "在读": "在读",
+    "在看": "在看",
+    "已读": "已读",
+    "已看": "已看"
+  };
+  return map[status] || status;
+}
+
 const todoStatusText: Record<string, string> = {
   todo: "想做",
   doing: "进行中",
@@ -200,8 +230,21 @@ export function MomentsManager({ initialMoments }: { initialMoments: Moment[] })
     }
   }
 
+  async function remove(moment: Moment) {
+    if (!confirm("确定删除这条动态吗？")) return;
+    setMessage("");
+    const previous = moments;
+    setMoments((current) => current.filter((item) => item.id !== moment.id));
+    try {
+      await deleteRequest(admin.token, "moment", moment.id);
+    } catch (error) {
+      setMoments(previous);
+      setMessage(error instanceof Error ? error.message : "删除失败。");
+    }
+  }
+
   return (
-    <>
+    <div className="moments-center">
       <div className="section-action-row">
         <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加动态" onAction={() => setShowForm(true)} />
       </div>
@@ -213,6 +256,7 @@ export function MomentsManager({ initialMoments }: { initialMoments: Moment[] })
             <p>{moment.content}</p>
             {moment.imageUrl ? <img className="content-image" src={moment.imageUrl} alt={moment.title || "动态图片"} /> : null}
             {moment.linkUrl ? <a className="text-link" href={moment.linkUrl}>相关链接</a> : null}
+            {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => remove(moment)}>删除</button> : null}
           </article>
         )) : <p className="empty-state">还没有动态。</p>}
       </div>
@@ -231,7 +275,7 @@ export function MomentsManager({ initialMoments }: { initialMoments: Moment[] })
           </form>
         </Modal>
       ) : null}
-    </>
+    </div>
   );
 }
 
@@ -271,6 +315,19 @@ export function TodoManager({ initialTodos }: { initialTodos: TodoItem[] }) {
     }
   }
 
+  async function remove(todo: TodoItem) {
+    if (!confirm("确定删除这条待办吗？")) return;
+    setMessage("");
+    const previous = todos;
+    setTodos((current) => current.filter((item) => item.id !== todo.id));
+    try {
+      await deleteRequest(admin.token, "todo", todo.id);
+    } catch (error) {
+      setTodos(previous);
+      setMessage(error instanceof Error ? error.message : "删除失败。");
+    }
+  }
+
   return (
     <>
       <div className="section-action-row">
@@ -286,6 +343,7 @@ export function TodoManager({ initialTodos }: { initialTodos: TodoItem[] }) {
                   <button className={`todo-check ${item.status === "done" ? "is-done" : ""}`} type="button" disabled={!admin.isAdmin} onClick={() => toggle(item)} aria-label="切换完成状态">{item.status === "done" ? "✓" : ""}</button>
                   <span>{item.title}</span>
                   <span className={`status-pill status-${item.status}`}>{todoStatusText[item.status] || item.status}</span>
+                  {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => remove(item)}>删除</button> : null}
                 </li>
               ))}
             </ul>
@@ -346,15 +404,28 @@ export function ReadingManager({ initialWorks }: { initialWorks: WorkItem[] }) {
     }
   }
 
+  async function remove(work: WorkItem) {
+    if (!confirm("确定删除这条书影记录吗？")) return;
+    setMessage("");
+    const previous = works;
+    setWorks((current) => current.filter((item) => item.id !== work.id));
+    try {
+      await deleteRequest(admin.token, "work", work.id);
+    } catch (error) {
+      setWorks(previous);
+      setMessage(error instanceof Error ? error.message : "删除失败。");
+    }
+  }
+
   return (
     <>
       <div className="section-action-row">
         <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加书籍/电影" onAction={() => setShowForm(true)} />
       </div>
       <div className="works-board">
-        <WorkSection title="书" items={books} isAdmin={admin.isAdmin} onStatus={updateStatus} />
-        <WorkSection title="影" items={movies} isAdmin={admin.isAdmin} onStatus={updateStatus} />
-        {others.length ? <WorkSection title="其他" items={others} isAdmin={admin.isAdmin} onStatus={updateStatus} /> : null}
+        <WorkSection title="书" items={books} isAdmin={admin.isAdmin} onStatus={updateStatus} onRemove={remove} />
+        <WorkSection title="影" items={movies} isAdmin={admin.isAdmin} onStatus={updateStatus} onRemove={remove} />
+        {others.length ? <WorkSection title="其他" items={others} isAdmin={admin.isAdmin} onStatus={updateStatus} onRemove={remove} /> : null}
       </div>
       {message ? <p className="form-error">{message}</p> : null}
       {showLogin ? <LoginModal onClose={() => setShowLogin(false)} onSave={admin.saveToken} /> : null}
@@ -364,7 +435,7 @@ export function ReadingManager({ initialWorks }: { initialWorks: WorkItem[] }) {
             <label>类型<select value={form.workType} onChange={(event) => setForm({ ...form, workType: event.target.value })}><option value="book">书籍</option><option value="movie">电影</option><option value="other">其他</option></select></label>
             <label>名称<input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} required /></label>
             <label>作者 / 导演<input value={form.creator} onChange={(event) => setForm({ ...form, creator: event.target.value })} /></label>
-            <label>状态<input value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })} placeholder="想读 / 在读 / 已读 / 想看 / 已看" /></label>
+            <label>状态<select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}><option value="want">想读/想看</option><option value="reading">正在读/正在看</option><option value="done">已读/已看</option></select></label>
             <ImageField token={admin.token} label="封面图，可选" value={form.coverImageUrl} onChange={(value) => setForm({ ...form, coverImageUrl: value })} />
             <label>日期<input value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} /></label>
             <label>简短备注<textarea value={form.note} onChange={(event) => setForm({ ...form, note: event.target.value })} /></label>
@@ -378,7 +449,7 @@ export function ReadingManager({ initialWorks }: { initialWorks: WorkItem[] }) {
   );
 }
 
-function WorkSection({ title, items, isAdmin, onStatus }: { title: string; items: WorkItem[]; isAdmin: boolean; onStatus: (work: WorkItem, status: string) => void }) {
+function WorkSection({ title, items, isAdmin, onStatus, onRemove }: { title: string; items: WorkItem[]; isAdmin: boolean; onStatus: (work: WorkItem, status: string) => void; onRemove: (work: WorkItem) => void }) {
   return (
     <section className="works-section">
       <h2>{title}</h2>
@@ -391,15 +462,17 @@ function WorkSection({ title, items, isAdmin, onStatus }: { title: string; items
               <p>{[item.creator, item.date].filter(Boolean).join(" · ")}</p>
             </div>
             {isAdmin ? (
-              <select className="status-select" value={item.status} onChange={(event) => onStatus(item, event.target.value)}>
-                <option value={item.type === "movie" ? "想看" : "想读"}>{item.type === "movie" ? "想看" : "想读"}</option>
-                <option value={item.type === "movie" ? "在看" : "在读"}>{item.type === "movie" ? "在看" : "在读"}</option>
-                <option value={item.type === "movie" ? "已看" : "已读"}>{item.type === "movie" ? "已看" : "已读"}</option>
+              <select className="status-select" value={["want", "reading", "done"].includes(item.status) ? item.status : item.status} onChange={(event) => onStatus(item, event.target.value)}>
+                {!["want", "reading", "done"].includes(item.status) ? <option value={item.status}>{workStatusLabel(item.status, item.type)}</option> : null}
+                <option value="want">{item.type === "movie" ? "想看" : "想读"}</option>
+                <option value="reading">{item.type === "movie" ? "在看" : "在读"}</option>
+                <option value="done">{item.type === "movie" ? "已看" : "已读"}</option>
               </select>
-            ) : <span className="status-pill">{item.status}</span>}
+            ) : <span className="status-pill">{workStatusLabel(item.status, item.type)}</span>}
             {item.note ? <p>{item.note}</p> : null}
             {item.reflection ? <p className="reflection-text">{item.reflection}</p> : null}
             {item.blogUrl ? <a className="text-link" href={item.blogUrl}>去博客看长文</a> : null}
+            {isAdmin ? <button className="text-danger" type="button" onClick={() => onRemove(item)}>删除</button> : null}
           </article>
         )) : <p className="empty-state">暂无记录。</p>}
       </div>
@@ -432,6 +505,19 @@ export function BlogManager({ initialPosts }: { initialPosts: BlogPost[] }) {
     }
   }
 
+  async function remove(post: BlogPost) {
+    if (!confirm("确定删除这篇博客吗？")) return;
+    setMessage("");
+    const previous = posts;
+    setPosts((current) => current.filter((item) => item.id !== post.id));
+    try {
+      await deleteRequest(admin.token, "blog", post.id);
+    } catch (error) {
+      setPosts(previous);
+      setMessage(error instanceof Error ? error.message : "删除失败。");
+    }
+  }
+
   return (
     <>
       <div className="section-action-row">
@@ -447,6 +533,7 @@ export function BlogManager({ initialPosts }: { initialPosts: BlogPost[] }) {
               <h2>{post.title}</h2>
               <p>{post.summary}</p>
               <Link className="text-link" href={`/blog/${post.slug}`}>阅读全文</Link>
+              {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => remove(post)}>删除</button> : null}
             </div>
           </article>
         )) : <p className="empty-state">还没有博客。</p>}
