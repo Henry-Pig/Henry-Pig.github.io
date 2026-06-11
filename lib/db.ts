@@ -311,9 +311,18 @@ export async function createWork(input: Omit<WorkItem, "id">) {
 export async function createBlogPost(input: Omit<BlogPost, "id">) {
   if (!sql) throw new Error("DATABASE_URL is not configured.");
   await ensureSchema();
+  let slug = input.slug;
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const candidate = attempt === 0 ? slug : `${slug}-${attempt + 1}`;
+    const [existing] = await sql<{ id: number }[]>`select id from blog_posts where slug = ${candidate} limit 1`;
+    if (!existing) {
+      slug = candidate;
+      break;
+    }
+  }
   const [post] = await sql<BlogPost[]>`
     insert into blog_posts (title, slug, date, category, summary, content, cover_image_url)
-    values (${input.title}, ${input.slug}, ${input.date}, ${input.category}, ${input.summary}, ${input.content || null}, ${input.coverImageUrl || null})
+    values (${input.title}, ${slug}, ${input.date}, ${input.category}, ${input.summary}, ${input.content || null}, ${input.coverImageUrl || null})
     returning
       id,
       title,

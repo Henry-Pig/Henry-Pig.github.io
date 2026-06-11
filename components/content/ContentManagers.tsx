@@ -88,16 +88,16 @@ async function deleteRequest(token: string, type: string, id: number | string) {
   return result.data;
 }
 
-function AdminBar({ isAdmin, onLogin, onLogout, actionLabel, onAction }: { isAdmin: boolean; onLogin: () => void; onLogout: () => void; actionLabel: string; onAction: () => void }) {
+function AdminBar({ isAdmin, onLogin, onLogout, actionLabel, actionLabelEn, onAction }: { isAdmin: boolean; onLogin: () => void; onLogout: () => void; actionLabel: string; actionLabelEn: string; onAction: () => void }) {
   return (
     <div className="inline-admin-bar">
       {isAdmin ? (
         <>
-          <button className="button button-primary" type="button" onClick={onAction}>{actionLabel}</button>
-          <button className="button button-secondary" type="button" onClick={onLogout}>退出管理</button>
+          <button className="button button-primary" type="button" onClick={onAction} data-en={actionLabelEn} data-zh={actionLabel}>{actionLabel}</button>
+          <button className="button button-secondary" type="button" onClick={onLogout} data-en="Exit Admin" data-zh="退出管理">退出管理</button>
         </>
       ) : (
-        <button className="button button-secondary subtle-admin-login" type="button" onClick={onLogin}>管理员登录</button>
+        <button className="button button-secondary subtle-admin-login" type="button" onClick={onLogin} data-en="Admin Login" data-zh="管理员登录">管理员登录</button>
       )}
     </div>
   );
@@ -143,29 +143,45 @@ function LoginModal({ onClose, onSave }: { onClose: () => void; onSave: (token: 
   );
 }
 
-function ImageField({ token, label, value, onChange }: { token: string; label: string; value: string; onChange: (value: string) => void }) {
+function ImageField({ token, label, value, onChange, onUploadingChange }: { token: string; label: string; value: string; onChange: (value: string) => void; onUploadingChange?: (uploading: boolean) => void }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
+  function setUploadState(next: boolean) {
+    setUploading(next);
+    onUploadingChange?.(next);
+  }
+
   async function upload(file: File) {
-    setUploading(true);
+    setUploadState(true);
     setError("");
-    const formData = new FormData();
-    formData.set("file", file);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 30000);
 
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      headers: { "x-admin-token": token },
-      body: formData
-    });
-    const result = (await response.json()) as ApiResult<{ url: string }>;
-    setUploading(false);
+    try {
+      const formData = new FormData();
+      formData.set("file", file);
 
-    if (!response.ok || !result.success || !result.data?.url) {
-      setError(result.error || "上传失败，也可以先手动粘贴图片 URL。");
-      return;
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "x-admin-token": token },
+        body: formData,
+        signal: controller.signal
+      });
+      const text = await response.text();
+      const result = text ? JSON.parse(text) as ApiResult<{ url: string }> : { success: false, error: "服务器没有返回内容。" };
+
+      if (!response.ok || !result.success || !result.data?.url) {
+        setError(result.error || "上传失败，也可以先手动粘贴图片 URL。");
+        return;
+      }
+      onChange(result.data.url);
+    } catch (error) {
+      setError(error instanceof DOMException && error.name === "AbortError" ? "上传超时，请检查 Vercel Blob 配置，或先粘贴图片 URL。" : "上传失败，请稍后再试，或先粘贴图片 URL。");
+    } finally {
+      window.clearTimeout(timeout);
+      setUploadState(false);
     }
-    onChange(result.data.url);
   }
 
   return (
@@ -173,7 +189,7 @@ function ImageField({ token, label, value, onChange }: { token: string; label: s
       {label}
       <input value={value} onChange={(event) => onChange(event.target.value)} placeholder="图片 URL，或选择文件上传" />
       <input className="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => event.target.files?.[0] && upload(event.target.files[0])} />
-      {uploading ? <span className="form-hint">图片上传中...</span> : null}
+      {uploading ? <span className="form-hint" data-en="Uploading image..." data-zh="图片上传中...">图片上传中...</span> : null}
       {error ? <span className="form-error">{error}</span> : null}
     </label>
   );
@@ -246,7 +262,7 @@ export function MomentsManager({ initialMoments }: { initialMoments: Moment[] })
   return (
     <div className="moments-center">
       <div className="section-action-row">
-        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加动态" onAction={() => setShowForm(true)} />
+        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加动态" actionLabelEn="Add Moment" onAction={() => setShowForm(true)} />
       </div>
       <div className="moment-feed">
         {moments.length ? moments.map((moment) => (
@@ -256,7 +272,7 @@ export function MomentsManager({ initialMoments }: { initialMoments: Moment[] })
             <p>{moment.content}</p>
             {moment.imageUrl ? <img className="content-image" src={moment.imageUrl} alt={moment.title || "动态图片"} /> : null}
             {moment.linkUrl ? <a className="text-link" href={moment.linkUrl}>相关链接</a> : null}
-            {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => remove(moment)}>删除</button> : null}
+            {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => remove(moment)} data-en="Delete" data-zh="删除">删除</button> : null}
           </article>
         )) : <p className="empty-state">还没有动态。</p>}
       </div>
@@ -270,7 +286,7 @@ export function MomentsManager({ initialMoments }: { initialMoments: Moment[] })
             <label>正文<textarea value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} required /></label>
             <ImageField token={admin.token} label="图片，可选" value={form.imageUrl} onChange={(value) => setForm({ ...form, imageUrl: value })} />
             <label>链接，可选<input value={form.linkUrl} onChange={(event) => setForm({ ...form, linkUrl: event.target.value })} /></label>
-            <button className="button button-primary" type="submit">发布动态</button>
+            <button className="button button-primary" type="submit" data-en="Publish Moment" data-zh="发布动态">发布动态</button>
             {message ? <p className="form-error">{message}</p> : null}
           </form>
         </Modal>
@@ -331,7 +347,7 @@ export function TodoManager({ initialTodos }: { initialTodos: TodoItem[] }) {
   return (
     <>
       <div className="section-action-row">
-        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加待办" onAction={() => setShowForm(true)} />
+        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加待办" actionLabelEn="Add Todo" onAction={() => setShowForm(true)} />
       </div>
       <div className="todo-list-page">
         {groups.map((group) => (
@@ -343,7 +359,7 @@ export function TodoManager({ initialTodos }: { initialTodos: TodoItem[] }) {
                   <button className={`todo-check ${item.status === "done" ? "is-done" : ""}`} type="button" disabled={!admin.isAdmin} onClick={() => toggle(item)} aria-label="切换完成状态">{item.status === "done" ? "✓" : ""}</button>
                   <span className="todo-title">{item.title}</span>
                   <span className={`status-pill status-${item.status}`}>{todoStatusText[item.status] || item.status}</span>
-                  {admin.isAdmin ? <button className="text-danger item-delete" type="button" onClick={() => remove(item)}>删除</button> : null}
+                  {admin.isAdmin ? <button className="text-danger item-delete" type="button" onClick={() => remove(item)} data-en="Delete" data-zh="删除">删除</button> : null}
                 </li>
               ))}
             </ul>
@@ -359,7 +375,7 @@ export function TodoManager({ initialTodos }: { initialTodos: TodoItem[] }) {
             <label>分类<input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} /></label>
             <label>事项<input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} required /></label>
             <label>状态<select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}><option value="todo">想做</option><option value="doing">进行中</option><option value="done">已完成</option><option value="paused">暂时搁置</option></select></label>
-            <button className="button button-primary" type="submit">保存待办</button>
+            <button className="button button-primary" type="submit" data-en="Save Todo" data-zh="保存待办">保存待办</button>
           </form>
         </Modal>
       ) : null}
@@ -420,7 +436,7 @@ export function ReadingManager({ initialWorks }: { initialWorks: WorkItem[] }) {
   return (
     <>
       <div className="section-action-row">
-        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加书籍/电影" onAction={() => setShowForm(true)} />
+        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加书籍/电影" actionLabelEn="Add Book / Film" onAction={() => setShowForm(true)} />
       </div>
       <div className="works-board">
         <WorkSection title="书" items={books} isAdmin={admin.isAdmin} onStatus={updateStatus} onRemove={remove} />
@@ -441,7 +457,7 @@ export function ReadingManager({ initialWorks }: { initialWorks: WorkItem[] }) {
             <label>简短备注<textarea value={form.note} onChange={(event) => setForm({ ...form, note: event.target.value })} /></label>
             <label>完成后感想<textarea value={form.reflection} onChange={(event) => setForm({ ...form, reflection: event.target.value })} /></label>
             <label>博客长文链接<input value={form.blogUrl} onChange={(event) => setForm({ ...form, blogUrl: event.target.value })} /></label>
-            <button className="button button-primary" type="submit">保存记录</button>
+            <button className="button button-primary" type="submit" data-en="Save Record" data-zh="保存记录">保存记录</button>
           </form>
         </Modal>
       ) : null}
@@ -469,7 +485,7 @@ function WorkSection({ title, items, isAdmin, onStatus, onRemove }: { title: str
                   <option value="reading">{item.type === "movie" ? "在看" : "在读"}</option>
                   <option value="done">{item.type === "movie" ? "已看" : "已读"}</option>
                 </select>
-                <button className="text-danger item-delete" type="button" onClick={() => onRemove(item)}>删除</button>
+                <button className="text-danger item-delete" type="button" onClick={() => onRemove(item)} data-en="Delete" data-zh="删除">删除</button>
               </div>
             ) : <span className="status-pill">{workStatusLabel(item.status, item.type)}</span>}
             {item.note ? <p>{item.note}</p> : null}
@@ -489,6 +505,7 @@ export function BlogManager({ initialPosts }: { initialPosts: BlogPost[] }) {
   const [showLogin, setShowLogin] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
   function insertImageMarkdown(url: string) {
     setForm((current) => ({ ...current, content: `${current.content}\n\n![图片](${url})` }));
@@ -523,7 +540,7 @@ export function BlogManager({ initialPosts }: { initialPosts: BlogPost[] }) {
   return (
     <>
       <div className="section-action-row">
-        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加博客" onAction={() => setShowForm(true)} />
+        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加博客" actionLabelEn="Add Blog" onAction={() => setShowForm(true)} />
       </div>
       <div className="blog-index">
         {posts.length ? posts.map((post) => (
@@ -534,8 +551,8 @@ export function BlogManager({ initialPosts }: { initialPosts: BlogPost[] }) {
               <span className="badge">{post.category}</span>
               <h2>{post.title}</h2>
               <p>{post.summary}</p>
-              <Link className="text-link" href={`/blog/${post.slug}`}>阅读全文</Link>
-              {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => remove(post)}>删除</button> : null}
+              <Link className="text-link" href={`/blog/${post.slug}`} data-en="Read More" data-zh="阅读全文">阅读全文</Link>
+              {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => remove(post)} data-en="Delete" data-zh="删除">删除</button> : null}
             </div>
           </article>
         )) : <p className="empty-state">还没有博客。</p>}
@@ -549,10 +566,12 @@ export function BlogManager({ initialPosts }: { initialPosts: BlogPost[] }) {
             <label>日期<input value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} placeholder="留空则使用今天" /></label>
             <label>分类<input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} /></label>
             <label>摘要<textarea value={form.summary} onChange={(event) => setForm({ ...form, summary: event.target.value })} required /></label>
-            <ImageField token={admin.token} label="封面图，可选" value={form.coverImageUrl} onChange={(value) => setForm({ ...form, coverImageUrl: value })} />
+            <ImageField token={admin.token} label="封面图，可选" value={form.coverImageUrl} onChange={(value) => setForm({ ...form, coverImageUrl: value })} onUploadingChange={setIsUploading} />
             <label>正文 Markdown<textarea value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} placeholder="可以写 Markdown，也可以插入图片语法：![说明](图片URL)" /></label>
-            <ImageField token={admin.token} label="正文图片上传，可选" value="" onChange={insertImageMarkdown} />
-            <button className="button button-primary" type="submit">发布博客</button>
+            <ImageField token={admin.token} label="正文图片上传，可选" value="" onChange={insertImageMarkdown} onUploadingChange={setIsUploading} />
+            <button className="button button-primary" type="submit" disabled={isUploading}>
+              {isUploading ? <span data-en="Waiting for Image Upload" data-zh="等待图片上传">等待图片上传</span> : <span data-en="Publish Blog" data-zh="发布博客">发布博客</span>}
+            </button>
             {message ? <p className="form-error">{message}</p> : null}
           </form>
         </Modal>

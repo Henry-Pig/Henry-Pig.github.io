@@ -158,10 +158,10 @@ export function ProjectManager({ initialProjects }: { initialProjects: ProjectIt
       <div className="section-action-row">
         {admin.isAdmin ? (
           <div className="inline-admin-bar">
-            <button className="button button-primary" type="button" onClick={() => openForm()}>添加项目</button>
-            <button className="button button-secondary" type="button" onClick={admin.logout}>退出管理</button>
+            <button className="button button-primary" type="button" onClick={() => openForm()} data-en="Add Project" data-zh="添加项目">添加项目</button>
+            <button className="button button-secondary" type="button" onClick={admin.logout} data-en="Exit Admin" data-zh="退出管理">退出管理</button>
           </div>
-        ) : <button className="button button-secondary subtle-admin-login" type="button" onClick={() => setShowLogin(true)}>管理员登录</button>}
+        ) : <button className="button button-secondary subtle-admin-login" type="button" onClick={() => setShowLogin(true)} data-en="Admin Login" data-zh="管理员登录">管理员登录</button>}
       </div>
 
       <div className="project-timeline">
@@ -177,9 +177,9 @@ export function ProjectManager({ initialProjects }: { initialProjects: ProjectIt
               <p>{project.summary}</p>
               <div className="project-tags">{project.techStack.map((tag) => <span key={tag}>{tag}</span>)}</div>
               <div className="card-actions">
-                <Link className="button button-secondary" href={`/projects/${project.slug}`}>查看详情</Link>
-                {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => openForm(project)}>编辑</button> : null}
-                {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => remove(project)}>删除</button> : null}
+                <Link className="button button-secondary" href={`/projects/${project.slug}`} data-en="View Details" data-zh="查看详情">查看详情</Link>
+                {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => openForm(project)} data-en="Edit" data-zh="编辑">编辑</button> : null}
+                {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => remove(project)} data-en="Delete" data-zh="删除">删除</button> : null}
               </div>
             </div>
           </article>
@@ -188,12 +188,12 @@ export function ProjectManager({ initialProjects }: { initialProjects: ProjectIt
 
       {message ? <p className="form-error">{message}</p> : null}
       {showLogin ? (
-        <div className="modal-backdrop"><div className="content-modal"><div className="modal-head"><h2>管理员登录</h2><button className="modal-close" type="button" onClick={() => setShowLogin(false)}>×</button></div><form className="inline-form" onSubmit={login}><label>管理密码<input type="password" value={loginValue} onChange={(event) => setLoginValue(event.target.value)} /></label><button className="button button-primary" type="submit">登录</button></form></div></div>
+        <div className="modal-backdrop"><div className="content-modal"><div className="modal-head"><h2 data-en="Admin Login" data-zh="管理员登录">管理员登录</h2><button className="modal-close" type="button" onClick={() => setShowLogin(false)}>×</button></div><form className="inline-form" onSubmit={login}><label>管理密码<input type="password" value={loginValue} onChange={(event) => setLoginValue(event.target.value)} /></label><button className="button button-primary" type="submit" data-en="Login" data-zh="登录">登录</button></form></div></div>
       ) : null}
       {showForm ? (
         <div className="modal-backdrop">
           <div className="content-modal">
-            <div className="modal-head"><h2>{editing ? "编辑项目" : "添加项目"}</h2><button className="modal-close" type="button" onClick={() => setShowForm(false)}>×</button></div>
+            <div className="modal-head"><h2 data-en={editing ? "Edit Project" : "Add Project"} data-zh={editing ? "编辑项目" : "添加项目"}>{editing ? "编辑项目" : "添加项目"}</h2><button className="modal-close" type="button" onClick={() => setShowForm(false)}>×</button></div>
             <form className="inline-form" onSubmit={submit}>
               <label>标题<input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} required /></label>
               <label>Slug<input value={form.slug} onChange={(event) => setForm({ ...form, slug: event.target.value })} /></label>
@@ -207,7 +207,7 @@ export function ProjectManager({ initialProjects }: { initialProjects: ProjectIt
               <label>封面图 URL<input value={form.coverImage} onChange={(event) => setForm({ ...form, coverImage: event.target.value })} /></label>
               <label>代码链接<input value={form.repoUrl} onChange={(event) => setForm({ ...form, repoUrl: event.target.value })} /></label>
               <label>排序<input value={form.sortOrder} onChange={(event) => setForm({ ...form, sortOrder: event.target.value })} /></label>
-              <button className="button button-primary" type="submit">保存项目</button>
+              <button className="button button-primary" type="submit" data-en="Save Project" data-zh="保存项目">保存项目</button>
             </form>
           </div>
         </div>

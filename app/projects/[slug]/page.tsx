@@ -26,12 +26,12 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
               <h1>{project.title}</h1>
               {project.description ? <p className="muted-text">{project.description}</p> : null}
               <div className="detail-meta-grid">
-                <div><span>时间</span><strong>{project.period}</strong></div>
-                <div><span>角色</span><strong>{project.role}</strong></div>
-                <div><span>类型</span><strong>{project.type}</strong></div>
+                <div><span data-en="Time" data-zh="时间">时间</span><strong>{project.period}</strong></div>
+                <div><span data-en="Role" data-zh="角色">角色</span><strong>{project.role}</strong></div>
+                <div><span data-en="Type" data-zh="类型">类型</span><strong>{project.type}</strong></div>
               </div>
               {project.coverImage ? <img className="article-cover" src={project.coverImage} alt={project.title} /> : null}
-              <section className="detail-section"><h2>项目简介</h2><p>{project.summary}</p></section>
+              <section className="detail-section"><h2 data-en="Overview" data-zh="项目简介">项目简介</h2><p>{project.summary}</p></section>
               {(project.content || []).map((section) => (
                 <section className="detail-section" key={section.title}>
                   <h2>{section.title}</h2>
@@ -53,8 +53,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
               <div className="project-tags">
                 {project.techStack.map((tag) => <span key={tag}>{tag}</span>)}
               </div>
-              {project.repoUrl ? <a className="button button-primary" href={project.repoUrl} target="_blank" rel="noopener">查看代码</a> : null}
-              <Link className="button button-secondary" href="/projects">返回项目目录</Link>
+              {project.repoUrl ? <a className="button button-primary" href={project.repoUrl} target="_blank" rel="noopener" data-en="View Code" data-zh="查看代码">查看代码</a> : null}
+              <Link className="button button-secondary" href="/projects" data-en="Back to Projects" data-zh="返回项目目录">返回项目目录</Link>
             </article>
           </div>
         </section>
