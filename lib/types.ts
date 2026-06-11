@@ -1,10 +1,12 @@
 export type Moment = {
   id: number | string;
+  title?: string | null;
   date: string;
   tag: string;
   content: string;
   imageUrl?: string | null;
   linkUrl?: string | null;
+  createdAt?: string | null;
 };
 
 export type TodoItem = {
@@ -12,17 +14,21 @@ export type TodoItem = {
   category: string;
   title: string;
   status: "todo" | "doing" | "done" | "paused";
+  updatedAt?: string | null;
 };
 
 export type WorkItem = {
   id: number | string;
-  type: "book" | "movie";
+  type: "book" | "movie" | "other";
   title: string;
   creator?: string | null;
   status: string;
   date?: string | null;
   note?: string | null;
+  reflection?: string | null;
+  coverImageUrl?: string | null;
   blogUrl?: string | null;
+  updatedAt?: string | null;
 };
 
 export type BlogPost = {
@@ -33,6 +39,8 @@ export type BlogPost = {
   category: string;
   summary: string;
   content?: string | null;
+  coverImageUrl?: string | null;
+  createdAt?: string | null;
 };
 
 export type SiteData = {

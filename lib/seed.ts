@@ -4,6 +4,7 @@ export const seedData: SiteData = {
   moments: [
     {
       id: "seed-moment-1",
+      title: "主页整理中",
       date: "2026.06",
       tag: "生活",
       content: "最近在整理个人主页，想让这个网站更像我自己一点。"

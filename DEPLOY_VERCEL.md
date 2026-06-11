@@ -59,6 +59,7 @@ postgres://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require
 ```txt
 DATABASE_URL="你的数据库连接字符串"
 ADMIN_TOKEN="你自己的后台密码"
+BLOB_READ_WRITE_TOKEN="Vercel Blob 的读写 Token，可选但推荐"
 ```
 
 注意：不要把 `.env.local` 提交到 GitHub。
@@ -102,6 +103,7 @@ vercel
 6. 在 Environment Variables 添加：
    - `DATABASE_URL`
    - `ADMIN_TOKEN`
+   - `BLOB_READ_WRITE_TOKEN`
 7. 点击 Deploy
 
 以后你 push 到 GitHub，Vercel 会自动重新部署。
@@ -120,3 +122,15 @@ vercel
 - `/admin` 后台添加内容
 
 旧的 `.html` 地址已经配置了重定向，例如 `/about.html` 会跳到 `/about`。
+
+## 8. 图片上传
+
+动态和博客已经支持图片 URL；如果你想直接上传图片，需要在 Vercel 项目里开启 Blob：
+
+1. 进入 Vercel 项目；
+2. 打开 `Storage`；
+3. 创建一个 Blob Store；
+4. 按 Vercel 提示把 `BLOB_READ_WRITE_TOKEN` 添加到 Environment Variables；
+5. 重新部署。
+
+如果暂时不配置 Blob，后台表单会提示上传不可用，但你仍然可以粘贴外部图片 URL。

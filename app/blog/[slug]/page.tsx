@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Nav } from "../../../components/Nav";
+import { MarkdownView } from "../../../components/MarkdownView";
 import { getSiteData } from "../../../lib/db";
+
+export const dynamic = "force-dynamic";
 
 type BlogDetailProps = {
   params: Promise<{ slug: string }>;
@@ -22,8 +25,9 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
           <p className="eyebrow">{post.category} · {post.date}</p>
           <h1>{post.title}</h1>
           <p className="muted-text">{post.summary}</p>
+          {post.coverImageUrl ? <img className="article-cover" src={post.coverImageUrl} alt={post.title} /> : null}
           <div className="lead-card">
-            {post.content ? post.content.split("\n").map((line) => <p key={line}>{line}</p>) : <p>这篇文章还只是一个占位，之后可以在后台继续补正文。</p>}
+            {post.content ? <MarkdownView content={post.content} /> : <p>这篇文章还只是一个占位，之后可以在后台继续补正文。</p>}
           </div>
           <Link className="button button-secondary" href="/blog">返回博客列表</Link>
         </article>

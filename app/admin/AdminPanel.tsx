@@ -55,7 +55,7 @@ export function AdminPanel() {
     setIsSubmitting(false);
 
     if (!response.ok) {
-      setMessage(result.message || "保存失败，请检查配置。");
+      setMessage(result.error || result.message || "保存失败，请检查配置。");
       return;
     }
 

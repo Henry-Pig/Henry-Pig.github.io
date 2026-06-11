@@ -1,0 +1,473 @@
+"use client";
+
+import Link from "next/link";
+import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import type { BlogPost, Moment, TodoItem, WorkItem } from "../../lib/types";
+
+type ApiResult<T> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+};
+
+const emptyMoment = { title: "", date: "", tag: "生活", content: "", imageUrl: "", linkUrl: "" };
+const emptyTodo = { category: "想完成的项目", title: "", status: "todo" };
+const emptyWork = { workType: "book", title: "", creator: "", status: "想读", date: "", note: "", reflection: "", coverImageUrl: "", blogUrl: "" };
+const emptyBlog = { title: "", slug: "", date: "", category: "随笔", summary: "", content: "", coverImageUrl: "" };
+
+function useAdmin() {
+  const [token, setToken] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [checked, setChecked] = useState(false);
+
+  async function verify(nextToken = token) {
+    if (!nextToken) {
+      setIsAdmin(false);
+      setChecked(true);
+      return false;
+    }
+
+    const response = await fetch("/api/auth", {
+      headers: { "x-admin-token": nextToken }
+    });
+    const result = await response.json();
+    const ok = Boolean(result.data?.isAdmin);
+    setIsAdmin(ok);
+    setChecked(true);
+    return ok;
+  }
+
+  useEffect(() => {
+    const saved = localStorage.getItem("admin-token") || "";
+    setToken(saved);
+    verify(saved);
+  }, []);
+
+  function saveToken(nextToken: string) {
+    localStorage.setItem("admin-token", nextToken);
+    setToken(nextToken);
+    return verify(nextToken);
+  }
+
+  function logout() {
+    localStorage.removeItem("admin-token");
+    setToken("");
+    setIsAdmin(false);
+  }
+
+  return { token, isAdmin, checked, saveToken, logout };
+}
+
+async function contentRequest<T>(method: "POST" | "PATCH", token: string, body: Record<string, unknown>) {
+  const response = await fetch("/api/content", {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      "x-admin-token": token
+    },
+    body: JSON.stringify(body)
+  });
+  const result = (await response.json()) as ApiResult<T>;
+  if (!response.ok || !result.success) {
+    throw new Error(result.error || "请求失败，请稍后再试。");
+  }
+  return result.data as T;
+}
+
+function AdminBar({ isAdmin, onLogin, onLogout, actionLabel, onAction }: { isAdmin: boolean; onLogin: () => void; onLogout: () => void; actionLabel: string; onAction: () => void }) {
+  return (
+    <div className="inline-admin-bar">
+      {isAdmin ? (
+        <>
+          <button className="button button-primary" type="button" onClick={onAction}>{actionLabel}</button>
+          <button className="button button-secondary" type="button" onClick={onLogout}>退出管理</button>
+        </>
+      ) : (
+        <button className="button button-secondary subtle-admin-login" type="button" onClick={onLogin}>管理员登录</button>
+      )}
+    </div>
+  );
+}
+
+function Modal({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
+  return (
+    <div className="modal-backdrop" role="dialog" aria-modal="true">
+      <div className="content-modal">
+        <div className="modal-head">
+          <h2>{title}</h2>
+          <button type="button" className="modal-close" onClick={onClose} aria-label="关闭">×</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function LoginModal({ onClose, onSave }: { onClose: () => void; onSave: (token: string) => Promise<boolean> }) {
+  const [value, setValue] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+    const ok = await onSave(value);
+    setLoading(false);
+    if (ok) onClose();
+    else setError("密码不正确，或者 Vercel 环境变量 ADMIN_TOKEN 未配置。");
+  }
+
+  return (
+    <Modal title="管理员登录" onClose={onClose}>
+      <form className="inline-form" onSubmit={submit}>
+        <label>管理密码<input type="password" value={value} onChange={(event) => setValue(event.target.value)} required /></label>
+        <button className="button button-primary" type="submit" disabled={loading}>{loading ? "验证中..." : "登录"}</button>
+        {error ? <p className="form-error">{error}</p> : null}
+      </form>
+    </Modal>
+  );
+}
+
+function ImageField({ token, label, value, onChange }: { token: string; label: string; value: string; onChange: (value: string) => void }) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function upload(file: File) {
+    setUploading(true);
+    setError("");
+    const formData = new FormData();
+    formData.set("file", file);
+
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      headers: { "x-admin-token": token },
+      body: formData
+    });
+    const result = (await response.json()) as ApiResult<{ url: string }>;
+    setUploading(false);
+
+    if (!response.ok || !result.success || !result.data?.url) {
+      setError(result.error || "上传失败，也可以先手动粘贴图片 URL。");
+      return;
+    }
+    onChange(result.data.url);
+  }
+
+  return (
+    <label>
+      {label}
+      <input value={value} onChange={(event) => onChange(event.target.value)} placeholder="图片 URL，或选择文件上传" />
+      <input className="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => event.target.files?.[0] && upload(event.target.files[0])} />
+      {uploading ? <span className="form-hint">图片上传中...</span> : null}
+      {error ? <span className="form-error">{error}</span> : null}
+    </label>
+  );
+}
+
+function groupedTodos(todos: TodoItem[]) {
+  return Array.from(new Set(todos.map((todo) => todo.category))).map((category) => ({
+    category,
+    items: todos.filter((todo) => todo.category === category)
+  }));
+}
+
+const todoStatusText: Record<string, string> = {
+  todo: "想做",
+  doing: "进行中",
+  done: "已完成",
+  paused: "暂时搁置"
+};
+
+export function MomentsManager({ initialMoments }: { initialMoments: Moment[] }) {
+  const admin = useAdmin();
+  const [moments, setMoments] = useState(initialMoments);
+  const [form, setForm] = useState(emptyMoment);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [message, setMessage] = useState("");
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage("");
+    try {
+      const created = await contentRequest<Moment>("POST", admin.token, { type: "moment", ...form });
+      setMoments((current) => [created, ...current]);
+      setForm(emptyMoment);
+      setShowForm(false);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "发布失败。");
+    }
+  }
+
+  return (
+    <>
+      <div className="section-action-row">
+        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加动态" onAction={() => setShowForm(true)} />
+      </div>
+      <div className="moment-feed">
+        {moments.length ? moments.map((moment) => (
+          <article className="moment-post" key={moment.id}>
+            <div className="moment-meta"><time>{moment.date}</time><span>{moment.tag}</span></div>
+            {moment.title ? <h2>{moment.title}</h2> : null}
+            <p>{moment.content}</p>
+            {moment.imageUrl ? <img className="content-image" src={moment.imageUrl} alt={moment.title || "动态图片"} /> : null}
+            {moment.linkUrl ? <a className="text-link" href={moment.linkUrl}>相关链接</a> : null}
+          </article>
+        )) : <p className="empty-state">还没有动态。</p>}
+      </div>
+      {showLogin ? <LoginModal onClose={() => setShowLogin(false)} onSave={admin.saveToken} /> : null}
+      {showForm ? (
+        <Modal title="添加动态" onClose={() => setShowForm(false)}>
+          <form className="inline-form" onSubmit={submit}>
+            <label>标题，可选<input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} /></label>
+            <label>日期<input value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} placeholder="留空则使用今天" /></label>
+            <label>标签<input value={form.tag} onChange={(event) => setForm({ ...form, tag: event.target.value })} /></label>
+            <label>正文<textarea value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} required /></label>
+            <ImageField token={admin.token} label="图片，可选" value={form.imageUrl} onChange={(value) => setForm({ ...form, imageUrl: value })} />
+            <label>链接，可选<input value={form.linkUrl} onChange={(event) => setForm({ ...form, linkUrl: event.target.value })} /></label>
+            <button className="button button-primary" type="submit">发布动态</button>
+            {message ? <p className="form-error">{message}</p> : null}
+          </form>
+        </Modal>
+      ) : null}
+    </>
+  );
+}
+
+export function TodoManager({ initialTodos }: { initialTodos: TodoItem[] }) {
+  const admin = useAdmin();
+  const [todos, setTodos] = useState(initialTodos);
+  const [form, setForm] = useState(emptyTodo);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [message, setMessage] = useState("");
+  const groups = useMemo(() => groupedTodos(todos), [todos]);
+
+  async function toggle(todo: TodoItem) {
+    if (!admin.isAdmin) return;
+    const previous = todos;
+    const nextStatus = todo.status === "done" ? "todo" : "done";
+    setTodos((current) => current.map((item) => item.id === todo.id ? { ...item, status: nextStatus } : item));
+    try {
+      const updated = await contentRequest<TodoItem>("PATCH", admin.token, { type: "todo", id: todo.id, status: nextStatus });
+      setTodos((current) => current.map((item) => item.id === updated.id ? updated : item));
+    } catch (error) {
+      setTodos(previous);
+      setMessage(error instanceof Error ? error.message : "状态更新失败。");
+    }
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage("");
+    try {
+      const created = await contentRequest<TodoItem>("POST", admin.token, { type: "todo", ...form });
+      setTodos((current) => [...current, created]);
+      setForm(emptyTodo);
+      setShowForm(false);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "添加失败。");
+    }
+  }
+
+  return (
+    <>
+      <div className="section-action-row">
+        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加待办" onAction={() => setShowForm(true)} />
+      </div>
+      <div className="todo-list-page">
+        {groups.map((group) => (
+          <section className="todo-group" key={group.category}>
+            <h2>{group.category}</h2>
+            <ul>
+              {group.items.map((item) => (
+                <li className={item.status === "done" ? "is-completed" : ""} key={item.id}>
+                  <button className={`todo-check ${item.status === "done" ? "is-done" : ""}`} type="button" disabled={!admin.isAdmin} onClick={() => toggle(item)} aria-label="切换完成状态">{item.status === "done" ? "✓" : ""}</button>
+                  <span>{item.title}</span>
+                  <span className={`status-pill status-${item.status}`}>{todoStatusText[item.status] || item.status}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+        {!groups.length ? <p className="empty-state">还没有清单。</p> : null}
+      </div>
+      {message ? <p className="form-error">{message}</p> : null}
+      {showLogin ? <LoginModal onClose={() => setShowLogin(false)} onSave={admin.saveToken} /> : null}
+      {showForm ? (
+        <Modal title="添加待办" onClose={() => setShowForm(false)}>
+          <form className="inline-form" onSubmit={submit}>
+            <label>分类<input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} /></label>
+            <label>事项<input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} required /></label>
+            <label>状态<select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}><option value="todo">想做</option><option value="doing">进行中</option><option value="done">已完成</option><option value="paused">暂时搁置</option></select></label>
+            <button className="button button-primary" type="submit">保存待办</button>
+          </form>
+        </Modal>
+      ) : null}
+    </>
+  );
+}
+
+export function ReadingManager({ initialWorks }: { initialWorks: WorkItem[] }) {
+  const admin = useAdmin();
+  const [works, setWorks] = useState(initialWorks);
+  const [form, setForm] = useState(emptyWork);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [message, setMessage] = useState("");
+  const books = works.filter((item) => item.type === "book");
+  const movies = works.filter((item) => item.type === "movie");
+  const others = works.filter((item) => item.type === "other");
+
+  async function updateStatus(work: WorkItem, status: string) {
+    if (!admin.isAdmin) return;
+    const previous = works;
+    setWorks((current) => current.map((item) => item.id === work.id ? { ...item, status } : item));
+    try {
+      const updated = await contentRequest<WorkItem>("PATCH", admin.token, { type: "work", id: work.id, status });
+      setWorks((current) => current.map((item) => item.id === updated.id ? updated : item));
+    } catch (error) {
+      setWorks(previous);
+      setMessage(error instanceof Error ? error.message : "状态更新失败。");
+    }
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage("");
+    try {
+      const created = await contentRequest<WorkItem>("POST", admin.token, { type: "work", ...form });
+      setWorks((current) => [...current, created]);
+      setForm(emptyWork);
+      setShowForm(false);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "添加失败。");
+    }
+  }
+
+  return (
+    <>
+      <div className="section-action-row">
+        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加书籍/电影" onAction={() => setShowForm(true)} />
+      </div>
+      <div className="works-board">
+        <WorkSection title="书" items={books} isAdmin={admin.isAdmin} onStatus={updateStatus} />
+        <WorkSection title="影" items={movies} isAdmin={admin.isAdmin} onStatus={updateStatus} />
+        {others.length ? <WorkSection title="其他" items={others} isAdmin={admin.isAdmin} onStatus={updateStatus} /> : null}
+      </div>
+      {message ? <p className="form-error">{message}</p> : null}
+      {showLogin ? <LoginModal onClose={() => setShowLogin(false)} onSave={admin.saveToken} /> : null}
+      {showForm ? (
+        <Modal title="添加书影记录" onClose={() => setShowForm(false)}>
+          <form className="inline-form" onSubmit={submit}>
+            <label>类型<select value={form.workType} onChange={(event) => setForm({ ...form, workType: event.target.value })}><option value="book">书籍</option><option value="movie">电影</option><option value="other">其他</option></select></label>
+            <label>名称<input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} required /></label>
+            <label>作者 / 导演<input value={form.creator} onChange={(event) => setForm({ ...form, creator: event.target.value })} /></label>
+            <label>状态<input value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })} placeholder="想读 / 在读 / 已读 / 想看 / 已看" /></label>
+            <ImageField token={admin.token} label="封面图，可选" value={form.coverImageUrl} onChange={(value) => setForm({ ...form, coverImageUrl: value })} />
+            <label>日期<input value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} /></label>
+            <label>简短备注<textarea value={form.note} onChange={(event) => setForm({ ...form, note: event.target.value })} /></label>
+            <label>完成后感想<textarea value={form.reflection} onChange={(event) => setForm({ ...form, reflection: event.target.value })} /></label>
+            <label>博客长文链接<input value={form.blogUrl} onChange={(event) => setForm({ ...form, blogUrl: event.target.value })} /></label>
+            <button className="button button-primary" type="submit">保存记录</button>
+          </form>
+        </Modal>
+      ) : null}
+    </>
+  );
+}
+
+function WorkSection({ title, items, isAdmin, onStatus }: { title: string; items: WorkItem[]; isAdmin: boolean; onStatus: (work: WorkItem, status: string) => void }) {
+  return (
+    <section className="works-section">
+      <h2>{title}</h2>
+      <div className="works-list">
+        {items.length ? items.map((item) => (
+          <article className="work-item" key={item.id}>
+            {item.coverImageUrl ? <img className="work-cover" src={item.coverImageUrl} alt={item.title} /> : null}
+            <div>
+              <h3>{item.title}</h3>
+              <p>{[item.creator, item.date].filter(Boolean).join(" · ")}</p>
+            </div>
+            {isAdmin ? (
+              <select className="status-select" value={item.status} onChange={(event) => onStatus(item, event.target.value)}>
+                <option value={item.type === "movie" ? "想看" : "想读"}>{item.type === "movie" ? "想看" : "想读"}</option>
+                <option value={item.type === "movie" ? "在看" : "在读"}>{item.type === "movie" ? "在看" : "在读"}</option>
+                <option value={item.type === "movie" ? "已看" : "已读"}>{item.type === "movie" ? "已看" : "已读"}</option>
+              </select>
+            ) : <span className="status-pill">{item.status}</span>}
+            {item.note ? <p>{item.note}</p> : null}
+            {item.reflection ? <p className="reflection-text">{item.reflection}</p> : null}
+            {item.blogUrl ? <a className="text-link" href={item.blogUrl}>去博客看长文</a> : null}
+          </article>
+        )) : <p className="empty-state">暂无记录。</p>}
+      </div>
+    </section>
+  );
+}
+
+export function BlogManager({ initialPosts }: { initialPosts: BlogPost[] }) {
+  const admin = useAdmin();
+  const [posts, setPosts] = useState(initialPosts);
+  const [form, setForm] = useState(emptyBlog);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [message, setMessage] = useState("");
+
+  function insertImageMarkdown(url: string) {
+    setForm((current) => ({ ...current, content: `${current.content}\n\n![图片](${url})` }));
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage("");
+    try {
+      const created = await contentRequest<BlogPost>("POST", admin.token, { type: "blog", ...form });
+      setPosts((current) => [created, ...current]);
+      setForm(emptyBlog);
+      setShowForm(false);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "发布失败。");
+    }
+  }
+
+  return (
+    <>
+      <div className="section-action-row">
+        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加博客" onAction={() => setShowForm(true)} />
+      </div>
+      <div className="blog-index">
+        {posts.length ? posts.map((post) => (
+          <article className="blog-row" key={post.id}>
+            <time>{post.date}</time>
+            {post.coverImageUrl ? <img className="blog-cover" src={post.coverImageUrl} alt={post.title} /> : null}
+            <div>
+              <span className="badge">{post.category}</span>
+              <h2>{post.title}</h2>
+              <p>{post.summary}</p>
+              <Link className="text-link" href={`/blog/${post.slug}`}>阅读全文</Link>
+            </div>
+          </article>
+        )) : <p className="empty-state">还没有博客。</p>}
+      </div>
+      {showLogin ? <LoginModal onClose={() => setShowLogin(false)} onSave={admin.saveToken} /> : null}
+      {showForm ? (
+        <Modal title="添加博客" onClose={() => setShowForm(false)}>
+          <form className="inline-form" onSubmit={submit}>
+            <label>标题<input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} required /></label>
+            <label>Slug，可选<input value={form.slug} onChange={(event) => setForm({ ...form, slug: event.target.value })} /></label>
+            <label>日期<input value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} placeholder="留空则使用今天" /></label>
+            <label>分类<input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} /></label>
+            <label>摘要<textarea value={form.summary} onChange={(event) => setForm({ ...form, summary: event.target.value })} required /></label>
+            <ImageField token={admin.token} label="封面图，可选" value={form.coverImageUrl} onChange={(value) => setForm({ ...form, coverImageUrl: value })} />
+            <label>正文 Markdown<textarea value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} placeholder="可以写 Markdown，也可以插入图片语法：![说明](图片URL)" /></label>
+            <ImageField token={admin.token} label="正文图片上传，可选" value="" onChange={insertImageMarkdown} />
+            <button className="button button-primary" type="submit">发布博客</button>
+            {message ? <p className="form-error">{message}</p> : null}
+          </form>
+        </Modal>
+      ) : null}
+    </>
+  );
+}
