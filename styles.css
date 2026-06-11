@@ -363,22 +363,56 @@
 }
 
 .todo-group li {
-  grid-template-columns: 24px minmax(0, 1fr) auto auto;
+  grid-template-columns: 24px minmax(0, 1fr) max-content max-content;
+  column-gap: 12px;
+  row-gap: 8px;
+  align-items: center;
 }
 
 .text-danger {
-  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  flex: 0 0 auto;
+  width: auto;
+  min-width: max-content;
   border: 0;
   background: transparent;
   color: var(--primary-active);
   cursor: pointer;
   font: inherit;
   font-size: 0.9rem;
+  line-height: 1;
+  white-space: nowrap;
+  word-break: keep-all;
   padding: 6px 0;
 }
 
 .text-danger:hover {
   text-decoration: underline;
+}
+
+.todo-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+.item-actions .status-select {
+  width: auto;
+  min-width: 96px;
+}
+
+.item-delete {
+  align-self: center;
 }
 
 @media (max-width: 900px) {
@@ -407,6 +441,25 @@
 
   .content-modal {
     padding: 20px;
+  }
+
+  .todo-group li {
+    grid-template-columns: 24px minmax(0, 1fr);
+  }
+
+  .todo-group .status-pill {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .todo-group .item-delete {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .item-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 }
 

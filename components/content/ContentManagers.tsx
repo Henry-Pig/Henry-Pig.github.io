@@ -341,9 +341,9 @@ export function TodoManager({ initialTodos }: { initialTodos: TodoItem[] }) {
               {group.items.map((item) => (
                 <li className={item.status === "done" ? "is-completed" : ""} key={item.id}>
                   <button className={`todo-check ${item.status === "done" ? "is-done" : ""}`} type="button" disabled={!admin.isAdmin} onClick={() => toggle(item)} aria-label="切换完成状态">{item.status === "done" ? "✓" : ""}</button>
-                  <span>{item.title}</span>
+                  <span className="todo-title">{item.title}</span>
                   <span className={`status-pill status-${item.status}`}>{todoStatusText[item.status] || item.status}</span>
-                  {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => remove(item)}>删除</button> : null}
+                  {admin.isAdmin ? <button className="text-danger item-delete" type="button" onClick={() => remove(item)}>删除</button> : null}
                 </li>
               ))}
             </ul>
@@ -462,17 +462,19 @@ function WorkSection({ title, items, isAdmin, onStatus, onRemove }: { title: str
               <p>{[item.creator, item.date].filter(Boolean).join(" · ")}</p>
             </div>
             {isAdmin ? (
-              <select className="status-select" value={["want", "reading", "done"].includes(item.status) ? item.status : item.status} onChange={(event) => onStatus(item, event.target.value)}>
-                {!["want", "reading", "done"].includes(item.status) ? <option value={item.status}>{workStatusLabel(item.status, item.type)}</option> : null}
-                <option value="want">{item.type === "movie" ? "想看" : "想读"}</option>
-                <option value="reading">{item.type === "movie" ? "在看" : "在读"}</option>
-                <option value="done">{item.type === "movie" ? "已看" : "已读"}</option>
-              </select>
+              <div className="item-actions">
+                <select className="status-select" value={["want", "reading", "done"].includes(item.status) ? item.status : item.status} onChange={(event) => onStatus(item, event.target.value)}>
+                  {!["want", "reading", "done"].includes(item.status) ? <option value={item.status}>{workStatusLabel(item.status, item.type)}</option> : null}
+                  <option value="want">{item.type === "movie" ? "想看" : "想读"}</option>
+                  <option value="reading">{item.type === "movie" ? "在看" : "在读"}</option>
+                  <option value="done">{item.type === "movie" ? "已看" : "已读"}</option>
+                </select>
+                <button className="text-danger item-delete" type="button" onClick={() => onRemove(item)}>删除</button>
+              </div>
             ) : <span className="status-pill">{workStatusLabel(item.status, item.type)}</span>}
             {item.note ? <p>{item.note}</p> : null}
             {item.reflection ? <p className="reflection-text">{item.reflection}</p> : null}
             {item.blogUrl ? <a className="text-link" href={item.blogUrl}>去博客看长文</a> : null}
-            {isAdmin ? <button className="text-danger" type="button" onClick={() => onRemove(item)}>删除</button> : null}
           </article>
         )) : <p className="empty-state">暂无记录。</p>}
       </div>

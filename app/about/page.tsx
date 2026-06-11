@@ -11,9 +11,10 @@ export default function AboutPage() {
               <p className="eyebrow" data-en="About" data-zh="关于我">关于我</p>
               <h1 data-en="About Me" data-zh="关于我">关于我</h1>
               <div className="lead-card about-intro">
-                <p data-en="Hello, I am Yu Shuheng, an undergraduate student at Jilin University majoring in Data Science and Big Data Technology." data-zh="你好，我是于书蘅，本科就读于吉林大学，专业是数据科学与大数据技术。">你好，我是于书蘅，本科就读于吉林大学，专业是数据科学与大数据技术。</p>
-                <p data-en="Most of the time, I level up in the world of computer science. I also appear from time to time in the gym or on a badminton court." data-zh="平时主要在计算机的世界里打怪升级，也会在健身房和羽毛球馆随机刷新。">平时主要在计算机的世界里打怪升级，也会在健身房和羽毛球馆随机刷新。</p>
-                <p data-en="I am someone still growing, sometimes slowly, sometimes clumsily, but always moving forward." data-zh="总之，我是一个正在努力变强、偶尔摆烂、但一直向前的人。欢迎来到我的个人主页。">总之，我是一个正在努力变强、偶尔摆烂、但一直向前的人。欢迎来到我的个人主页。</p>
+                <p data-en="Hello, I am Yu Shuheng, an undergraduate student at Jilin University." data-zh="你好，我是于书蘅，本科就读于吉林大学。">你好，我是于书蘅，本科就读于吉林大学。</p>
+                <p data-en="Most of the time, I level up in the world of computer science, wrestling with code, algorithms, major courses, and bugs in every possible sense. Outside study, I also appear from time to time in the gym or on a badminton court." data-zh="平时主要在计算机的世界里打怪升级，和代码、算法、专业课以及各种意义上的 bug 斗智斗勇；学习之余，也会在健身房和羽毛球馆随机刷新。">平时主要在计算机的世界里打怪升级，和代码、算法、专业课以及各种意义上的 bug 斗智斗勇；学习之余，也会在健身房和羽毛球馆随机刷新。</p>
+                <p data-en="Deep down, I am still someone who loves to play. I may not be especially skilled, but when I become a Tenno traveling among the stars, pick up an AK and fight through Dust II, or raise the golden staff to face the fallen Great Sage, I feel like that carefree kid who never really grew up." data-zh="但说到底，我也是一个很贪玩的人。尽管没有多么精湛的技术，但当我化身 Tenno 在星际间穿梭，拿起 AK 在沙二出生入死，或是举起金箍棒面对大圣残躯时，我仿佛又变回了那个尚未长大的、无忧无虑的小孩。">但说到底，我也是一个很贪玩的人。尽管没有多么精湛的技术，但当我化身 Tenno 在星际间穿梭，拿起 AK 在沙二出生入死，或是举起金箍棒面对大圣残躯时，我仿佛又变回了那个尚未长大的、无忧无虑的小孩。</p>
+                <p data-en="I do not have Naruto Uzumaki's extraordinary persistence, nor Sasuke Uchiha's astonishing talent, but I am still growing through all the stumbles, slowly becoming a better version of myself." data-zh="我没有漩涡鸣人那样强大的毅力，也没有宇智波佐助那样惊人的天赋，但我依然在磕磕绊绊中努力长大，慢慢成为更好的自己。">我没有漩涡鸣人那样强大的毅力，也没有宇智波佐助那样惊人的天赋，但我依然在磕磕绊绊中努力长大，慢慢成为更好的自己。</p>
               </div>
             </div>
             <aside className="about-card" aria-label="基础信息">
