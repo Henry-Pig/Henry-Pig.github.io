@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="于书蘅的博客文章列表。">
+  <title>Blog | 于书蘅</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav shell" aria-label="主导航">
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">*</span><span data-en="Home" data-zh="首页">Home</span></a>
+      <div class="nav-right">
+        <div class="nav-links">
+          <a href="about.html" data-en="About" data-zh="关于我">About</a>
+          <a href="projects.html" data-en="Projects" data-zh="项目">Projects</a>
+          <div class="nav-dropdown" data-dropdown>
+            <button class="nav-dropdown-toggle" type="button" aria-expanded="false" data-dropdown-toggle data-en="Life" data-zh="生活">Life</button>
+            <div class="nav-dropdown-menu">
+              <a href="moments.html" data-en="Moments" data-zh="动态">Moments</a>
+              <a href="todo.html" data-en="Lists" data-zh="清单">Lists</a>
+              <a href="reading.html" data-en="Books & Films" data-zh="书影">Books & Films</a>
+            </div>
+          </div>
+          <a class="active" href="blog.html" data-en="Blog" data-zh="博客">Blog</a>
+        </div>
+        <button class="language-toggle" type="button" aria-label="切换中英文" data-lang-toggle>中文</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-main">
+    <section class="page-hero shell">
+      <div class="section-heading">
+        <p class="eyebrow" data-en="Blog" data-zh="博客">Blog</p>
+        <h1 data-en="Notes Before They Scatter" data-zh="在想法散开之前">在想法散开之前</h1>
+        <p class="muted-text" data-en="A static list for essays, study notes, and small pieces of thinking." data-zh="这里先放小文章、学习笔记和一些还没有长成论文的思考。">这里先放小文章、学习笔记和一些还没有长成论文的思考。</p>
+      </div>
+      <div class="blog-index" data-blog-root></div>
+    </section>
+  </main>
+  <script src="life-data.js"></script>
+  <script src="language.js"></script>
+</body>
+</html>

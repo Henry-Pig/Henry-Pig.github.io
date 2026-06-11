@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="于书蘅的项目展示。">
+  <title>Projects | 于书蘅</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav shell" aria-label="主导航">
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">*</span><span data-en="Home" data-zh="首页">Home</span></a>
+      <div class="nav-right">
+        <div class="nav-links">
+          <a href="about.html" data-en="About" data-zh="关于我">About</a>
+          <a class="active" href="projects.html" data-en="Projects" data-zh="项目">Projects</a>
+          <div class="nav-dropdown" data-dropdown>
+            <button class="nav-dropdown-toggle" type="button" aria-expanded="false" data-dropdown-toggle data-en="Life" data-zh="生活">Life</button>
+            <div class="nav-dropdown-menu">
+              <a href="moments.html" data-en="Moments" data-zh="动态">Moments</a>
+              <a href="todo.html" data-en="Lists" data-zh="清单">Lists</a>
+              <a href="reading.html" data-en="Books & Films" data-zh="书影">Books & Films</a>
+            </div>
+          </div>
+          <a href="blog.html" data-en="Blog" data-zh="博客">Blog</a>
+        </div>
+        <button class="language-toggle" type="button" aria-label="切换中英文" data-lang-toggle>中文</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-main">
+    <section class="page-hero section-soft">
+      <div class="shell">
+        <div class="section-heading">
+          <p class="eyebrow" data-en="Projects" data-zh="项目">Projects</p>
+          <h1 data-en="Research and Projects" data-zh="科研与项目经历">科研与项目经历</h1>
+          <p data-en="A chronological selection of my research and engineering work, including graph neural networks, person re-identification, and image recognition." data-zh="按时间顺序整理的科研与工程项目，涵盖图神经网络、身份重识别、论文复现和图像识别等方向。">按时间顺序整理的科研与工程项目，涵盖图神经网络、身份重识别、论文复现和图像识别等方向。</p>
+        </div>
+
+        <div class="project-timeline">
+          <article class="project-row">
+            <time class="project-time">2025.09</time>
+            <div class="project-card">
+              <div class="project-card-head">
+                <span class="badge" data-en="Image Classification / Deep Learning" data-zh="图像分类 / 深度学习">图像分类 / 深度学习</span>
+                <span class="project-role" data-en="Core Member" data-zh="核心成员">核心成员</span>
+              </div>
+              <h2><a href="projects/densenet-caltech101.html" data-en="Caltech-101 Image Recognition and Comparative Study Based on DenseNet121" data-zh="基于 DenseNet121 的 Caltech-101 图像识别与对比研究">基于 DenseNet121 的 Caltech-101 图像识别与对比研究</a></h2>
+              <p data-en="Built a DenseNet121 transfer learning pipeline for Caltech-101, introduced data augmentation, replaced the classifier with a two-layer fully connected head, and compared performance with ResNet50." data-zh="面向 Caltech-101 多类别图像识别任务，构建 DenseNet121 迁移学习方案，引入数据增强策略，将原分类器替换为两层全连接头，并与 ResNet50 进行性能对比分析。">面向 Caltech-101 多类别图像识别任务，构建 DenseNet121 迁移学习方案，引入数据增强策略，将原分类器替换为两层全连接头，并与 ResNet50 进行性能对比分析。</p>
+              <div class="project-tags">
+                <span>DenseNet121</span>
+                <span>Caltech-101</span>
+                <span>Transfer Learning</span>
+              </div>
+              <a class="button button-secondary" href="projects/densenet-caltech101.html" data-en="View Details" data-zh="查看详情">查看详情</a>
+            </div>
+          </article>
+
+          <article class="project-row">
+            <time class="project-time">2025.09 - 2026.01</time>
+            <div class="project-card">
+              <div class="project-card-head">
+                <span class="badge" data-en="Paper / Research" data-zh="论文 / 科研项目">论文 / 科研项目</span>
+                <span class="project-role" data-en="Third Author" data-zh="第三作者">第三作者</span>
+              </div>
+              <h2><a href="projects/dti-subgraph-attention.html">A Dual Channel Subgraph Attention Framework for Drug-Target Interaction Prediction by Eliminating Meta-path Dependency</a></h2>
+              <p data-en="Proposed a heterogeneous graph neural network method for drug-target interaction prediction, reducing dependence on handcrafted meta-paths through dual-channel subgraphs, edge-type attention embedding, and a TP-Graph prediction module." data-zh="提出了一种面向药物—靶点相互作用预测的异构图神经网络方法，通过双通道子图、边类型注意力嵌入和 TP-Graph 预测模块，减少对人工路径设计的依赖。">提出了一种面向药物—靶点相互作用预测的异构图神经网络方法，通过双通道子图、边类型注意力嵌入和 TP-Graph 预测模块，减少对人工路径设计的依赖。</p>
+              <div class="project-tags">
+                <span>Heterogeneous Graph</span>
+                <span>DTI</span>
+                <span>Attention</span>
+              </div>
+              <a class="button button-secondary" href="projects/dti-subgraph-attention.html" data-en="View Details" data-zh="查看详情">查看详情</a>
+            </div>
+          </article>
+
+          <article class="project-row">
+            <time class="project-time">2025.10 - 2025.11</time>
+            <div class="project-card">
+              <div class="project-card-head">
+                <span class="badge" data-en="Paper Reproduction / Deep Learning" data-zh="论文复现 / 深度学习项目">论文复现 / 深度学习项目</span>
+                <span class="project-role" data-en="Core Member" data-zh="核心成员">核心成员</span>
+              </div>
+              <h2><a href="projects/convnextv2-lightlygrn.html" data-en="ConvNeXt V2 Paper Reproduction and Improvement" data-zh="ConvNeXt V2 论文复现与改进">ConvNeXt V2 论文复现与改进</a></h2>
+              <p data-en="Reproduced and improved FCMAE and GRN modules from ConvNeXt V2, fine-tuned ConvNeXt V2 Tiny on CIFAR-100, and designed LightlyGRN to reduce the original GRN computation and parameter cost." data-zh="围绕 ConvNeXt V2 中 FCMAE 与 GRN 模块展开复现与改进，在 CIFAR-100 数据集上进行微调实验，并设计 LightlyGRN 模块进行对比分析。">围绕 ConvNeXt V2 中 FCMAE 与 GRN 模块展开复现与改进，在 CIFAR-100 数据集上进行微调实验，并设计 LightlyGRN 模块进行对比分析。</p>
+              <div class="project-tags">
+                <span>ConvNeXt V2</span>
+                <span>CIFAR-100</span>
+                <span>LightlyGRN</span>
+              </div>
+              <a class="button button-secondary" href="projects/convnextv2-lightlygrn.html" data-en="View Details" data-zh="查看详情">查看详情</a>
+            </div>
+          </article>
+
+          <article class="project-row">
+            <time class="project-time">2026.03 - 至今</time>
+            <div class="project-card">
+              <div class="project-card-head">
+                <span class="badge" data-en="Research / Algorithm" data-zh="科研 / 算法项目">科研 / 算法项目</span>
+                <span class="project-role" data-en="Core Member" data-zh="核心成员">核心成员</span>
+              </div>
+              <h2><a href="projects/basketball-reid.html" data-en="Basketball Ball-Handler Person Re-identification in Complex Motion Scenes" data-zh="复杂运动场景下篮球持球人身份重识别算法开发">复杂运动场景下篮球持球人身份重识别算法开发</a></h2>
+              <p data-en="Built HE-TransReID on top of TransReID for complex basketball scenes, improving JPM with Hyper-Connection, local feature fusion, and A-Jaccard re-ranking to improve retrieval accuracy and robustness." data-zh="面向篮球比赛复杂运动场景，基于 TransReID 构建 HE-TransReID 身份识别模型，改进 JPM 模块并引入 Hyper-Connection、局部特征融合和基于 A-Jaccard 的重排序方法。">面向篮球比赛复杂运动场景，基于 TransReID 构建 HE-TransReID 身份识别模型，改进 JPM 模块并引入 Hyper-Connection、局部特征融合和基于 A-Jaccard 的重排序方法。</p>
+              <div class="project-tags">
+                <span>TransReID</span>
+                <span>ReID</span>
+                <span>Hyper-Connection</span>
+              </div>
+              <a class="button button-secondary" href="projects/basketball-reid.html" data-en="View Details" data-zh="查看详情">查看详情</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="language.js"></script>
+</body>
+</html>

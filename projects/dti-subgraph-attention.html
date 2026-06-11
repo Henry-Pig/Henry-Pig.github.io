@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="面向药物靶点相互作用预测的双通道子图注意力框架科研项目。">
+  <title>SGAN-DTI | 于书蘅</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav shell" aria-label="主导航">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">*</span><span data-en="Home" data-zh="首页">Home</span></a>
+      <div class="nav-right">
+        <div class="nav-links">
+          <a href="../about.html" data-en="About" data-zh="关于我">About</a>
+          <a class="active" href="../projects.html" data-en="Projects" data-zh="项目">Projects</a>
+          <div class="nav-dropdown" data-dropdown>
+            <button class="nav-dropdown-toggle" type="button" aria-expanded="false" data-dropdown-toggle data-en="Life" data-zh="生活">Life</button>
+            <div class="nav-dropdown-menu">
+              <a href="../moments.html" data-en="Moments" data-zh="动态">Moments</a>
+              <a href="../todo.html" data-en="Lists" data-zh="清单">Lists</a>
+              <a href="../reading.html" data-en="Books & Films" data-zh="书影">Books & Films</a>
+            </div>
+          </div>
+          <a href="../blog.html" data-en="Blog" data-zh="博客">Blog</a>
+        </div>
+        <button class="language-toggle" type="button" aria-label="切换中英文" data-lang-toggle>中文</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-main">
+    <article class="project-detail shell">
+      <a class="text-link back-link" href="../projects.html" data-en="Back to Projects" data-zh="返回项目目录">返回项目目录</a>
+
+      <div class="project-detail-head">
+        <p class="eyebrow" data-en="Paper / Research" data-zh="论文 / 科研项目">论文 / 科研项目</p>
+        <h1>A Dual Channel Subgraph Attention Framework for Drug-Target Interaction Prediction by Eliminating Meta-path Dependency</h1>
+        <p class="detail-lead" data-en="A heterogeneous graph neural network project for drug-target interaction prediction. The proposed SGAN-DTI framework uses dual-channel subgraphs, edge-type attention embeddings, and a DTP-Graph prediction module to reduce dependence on handcrafted meta-paths." data-zh="面向药物—靶点相互作用预测的双通道子图注意力框架。项目提出 SGAN-DTI，使用双通道异构子图、边类型注意力嵌入与 DTP-Graph 预测模块，减少传统异构图方法对人工 Meta-path 设计的依赖。">面向药物—靶点相互作用预测的双通道子图注意力框架。项目提出 SGAN-DTI，使用双通道异构子图、边类型注意力嵌入与 DTP-Graph 预测模块，减少传统异构图方法对人工 Meta-path 设计的依赖。</p>
+      </div>
+
+      <div class="detail-grid">
+        <aside class="detail-meta">
+          <dl class="info-list">
+            <div><dt data-en="Chinese Title" data-zh="中文标题">中文标题</dt><dd data-en="Dual-channel subgraph attention framework for drug-target interaction prediction" data-zh="面向药物—靶点相互作用预测的双通道子图注意力框架">面向药物—靶点相互作用预测的双通道子图注意力框架</dd></div>
+            <div><dt data-en="Time" data-zh="时间">时间</dt><dd>2025.09 - 2026.01</dd></div>
+            <div><dt data-en="Role" data-zh="角色">角色</dt><dd data-en="Third Author" data-zh="第三作者">第三作者</dd></div>
+            <div><dt data-en="Status" data-zh="状态">状态</dt><dd data-en="Submitted to IEEE/ACM TCBB (CCF-B)" data-zh="在投于 IEEE/ACM TCBB（CCF-B 类期刊）">在投于 IEEE/ACM TCBB（CCF-B 类期刊）</dd></div>
+            <div><dt data-en="Model" data-zh="模型名称">模型名称</dt><dd>SGAN-DTI</dd></div>
+          </dl>
+        </aside>
+
+        <section class="detail-content">
+          <section class="detail-block">
+            <h2 data-en="Project Overview" data-zh="项目简介">项目简介</h2>
+            <p data-en="Drug-target interaction prediction helps accelerate drug discovery and drug repositioning by identifying potential associations between drugs and proteins before costly biological validation. This project models drugs, targets, diseases, and side effects as a heterogeneous biological network, then predicts DTI links through a meta-path-independent dual-channel subgraph attention framework." data-zh="药物—靶点相互作用预测可以在昂贵的生物实验前筛选潜在作用关系，为药物研发与老药新用提供计算支持。本项目将药物、靶点、疾病和副作用建模为异构生物网络，并通过不依赖人工元路径的双通道子图注意力框架完成 DTI 链接预测。">药物—靶点相互作用预测可以在昂贵的生物实验前筛选潜在作用关系，为药物研发与老药新用提供计算支持。本项目将药物、靶点、疾病和副作用建模为异构生物网络，并通过不依赖人工元路径的双通道子图注意力框架完成 DTI 链接预测。</p>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Background and Motivation" data-zh="背景与动机">背景与动机</h2>
+            <ul class="detail-list">
+              <li data-en="Traditional similarity-based methods often separate representation learning from prediction, which limits their ability to capture complex nonlinear interactions." data-zh="传统相似性方法通常将特征学习与预测阶段解耦，难以充分刻画复杂非线性药物—靶点关系。">传统相似性方法通常将特征学习与预测阶段解耦，难以充分刻画复杂非线性药物—靶点关系。</li>
+              <li data-en="Many heterogeneous GNN methods rely on manually designed meta-paths, bringing rigidity and possible human bias into feature aggregation." data-zh="许多异构图神经网络方法依赖人工设计的 Meta-path，特征聚合方式较固定，也可能引入主观路径设计偏差。">许多异构图神经网络方法依赖人工设计的 Meta-path，特征聚合方式较固定，也可能引入主观路径设计偏差。</li>
+              <li data-en="SGAN-DTI replaces predefined paths with local subgraphs centered on drugs and targets, aiming to improve flexibility, robustness, and generalization across biological networks of different scales." data-zh="SGAN-DTI 用药物侧与靶点侧局部子图替代预定义路径，希望在不同规模的异构生物网络上提升灵活性、鲁棒性与泛化能力。">SGAN-DTI 用药物侧与靶点侧局部子图替代预定义路径，希望在不同规模的异构生物网络上提升灵活性、鲁棒性与泛化能力。</li>
+            </ul>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Method Framework" data-zh="方法框架">方法框架</h2>
+            <div class="route-grid">
+              <article>
+                <span>01</span>
+                <h3 data-en="Dual-channel Subgraphs" data-zh="双通道子图">双通道子图</h3>
+                <p data-en="Construct Subgraph-D centered on drugs and Subgraph-T centered on targets. Subgraph-D uses D-D, D-T, D-I, and D-S relations; Subgraph-T uses T-T, D-T, and T-I relations." data-zh="构造以药物为中心的 Subgraph-D 和以靶点为中心的 Subgraph-T。药物子图包含 D-D、D-T、D-I、D-S 关系，靶点子图包含 T-T、D-T、T-I 关系。">构造以药物为中心的 Subgraph-D 和以靶点为中心的 Subgraph-T。药物子图包含 D-D、D-T、D-I、D-S 关系，靶点子图包含 T-T、D-T、T-I 关系。</p>
+              </article>
+              <article>
+                <span>02</span>
+                <h3 data-en="Edge-type Attention" data-zh="边类型注意力">边类型注意力</h3>
+                <p data-en="Introduce learnable edge-type embeddings into a Simple-HGN style attention layer, so different biological relations contribute dynamically during neighbor aggregation." data-zh="在 Simple-HGN 风格的注意力层中引入可学习边类型嵌入，使不同生物关系在邻居聚合时能够动态贡献语义信息。">在 Simple-HGN 风格的注意力层中引入可学习边类型嵌入，使不同生物关系在邻居聚合时能够动态贡献语义信息。</p>
+              </article>
+              <article>
+                <span>03</span>
+                <h3 data-en="DTP-Graph Prediction" data-zh="DTP-Graph 预测">DTP-Graph 预测</h3>
+                <p data-en="Build a graph whose nodes are drug-target pairs, then use graph convolution to mine high-order correlations between candidate pairs before classification." data-zh="将药物—靶点对作为节点构建 DTP-Graph，并在预测前通过图卷积挖掘候选作用对之间的高阶关联。">将药物—靶点对作为节点构建 DTP-Graph，并在预测前通过图卷积挖掘候选作用对之间的高阶关联。</p>
+              </article>
+              <article>
+                <span>04</span>
+                <h3 data-en="Meta-path Independence" data-zh="降低元路径依赖">降低元路径依赖</h3>
+                <p data-en="The framework learns from relation-aware local subgraphs instead of manually enumerated meta-paths, reducing handcrafted path dependency." data-zh="框架从关系感知的局部子图中学习表示，而不是手工枚举元路径，从而降低对人工路径设计的依赖。">框架从关系感知的局部子图中学习表示，而不是手工枚举元路径，从而降低对人工路径设计的依赖。</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Core Contributions" data-zh="核心贡献 / 创新点">核心贡献 / 创新点</h2>
+            <ul class="detail-list">
+              <li data-en="Proposed SGAN-DTI, a subgraph attention framework for DTI prediction that avoids heavy reliance on handcrafted meta-paths." data-zh="提出 SGAN-DTI：一种面向 DTI 预测的子图注意力框架，避免对人工设计 Meta-path 的强依赖。">提出 SGAN-DTI：一种面向 DTI 预测的子图注意力框架，避免对人工设计 Meta-path 的强依赖。</li>
+              <li data-en="Built drug-centered and target-centered heterogeneous subgraphs to capture local biological context independently." data-zh="构建药物中心与靶点中心的双通道异构子图，分别捕获两类节点的局部生物语义上下文。">构建药物中心与靶点中心的双通道异构子图，分别捕获两类节点的局部生物语义上下文。</li>
+              <li data-en="Used edge-type embeddings, residual connections, multi-head attention, and L2 normalization to improve heterogeneous representation learning and training stability." data-zh="结合边类型嵌入、残差连接、多头注意力与 L2 归一化，增强异构图表示能力与训练稳定性。">结合边类型嵌入、残差连接、多头注意力与 L2 归一化，增强异构图表示能力与训练稳定性。</li>
+              <li data-en="Designed a DTP-Graph prediction module to capture high-order associations among drug-target pairs, complementing ordinary MLP-based prediction." data-zh="设计 DTP-Graph 预测模块，捕捉药物—靶点候选对之间的高阶关联，补充普通 MLP 预测器难以建模的 pair-level 关系。">设计 DTP-Graph 预测模块，捕捉药物—靶点候选对之间的高阶关联，补充普通 MLP 预测器难以建模的 pair-level 关系。</li>
+              <li data-en="Validated the framework on two heterogeneous biological datasets with systematic baseline comparison and ablation studies." data-zh="在两个不同规模的异构生物数据集上进行系统实验，并通过 baseline 对比与消融实验验证模块有效性。">在两个不同规模的异构生物数据集上进行系统实验，并通过 baseline 对比与消融实验验证模块有效性。</li>
+            </ul>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Experiment Design and Results" data-zh="实验设计与结果">实验设计与结果</h2>
+            <div class="metric-grid">
+              <article class="metric-card">
+                <span data-en="Hetero-A" data-zh="Hetero-A">Hetero-A</span>
+                <strong>0.9847</strong>
+                <p data-en="AUC of SGAN-DTI; AUPR is 0.9792." data-zh="SGAN-DTI 的 AUC；AUPR 为 0.9792。">SGAN-DTI 的 AUC；AUPR 为 0.9792。</p>
+              </article>
+              <article class="metric-card metric-card-strong">
+                <span data-en="Hetero-B" data-zh="Hetero-B">Hetero-B</span>
+                <strong>0.9889</strong>
+                <p data-en="AUC of SGAN-DTI; AUPR is 0.9837." data-zh="SGAN-DTI 的 AUC；AUPR 为 0.9837。">SGAN-DTI 的 AUC；AUPR 为 0.9837。</p>
+              </article>
+              <article class="metric-card">
+                <span data-en="Evaluation" data-zh="评测方式">评测方式</span>
+                <strong>10-fold</strong>
+                <p data-en="Train / validation / test split is 7:2:1 with 1:1 positive-negative sampling." data-zh="训练 / 验证 / 测试为 7:2:1，正负样本比例为 1:1。">训练 / 验证 / 测试为 7:2:1，正负样本比例为 1:1。</p>
+              </article>
+            </div>
+
+            <div class="result-table-wrap">
+              <table class="result-table">
+                <thead>
+                  <tr>
+                    <th data-en="Dataset" data-zh="数据集">数据集</th>
+                    <th data-en="Drugs / Targets" data-zh="药物 / 靶点">药物 / 靶点</th>
+                    <th data-en="DTI Edges" data-zh="D-T 边">D-T 边</th>
+                    <th>AUC</th>
+                    <th>AUPR</th>
+                    <th>F1</th>
+                    <th>MCC</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Hetero-A</td>
+                    <td>708 / 1,152</td>
+                    <td>1,923</td>
+                    <td>0.9847 ± 0.005</td>
+                    <td>0.9792 ± 0.007</td>
+                    <td>0.9369 ± 0.020</td>
+                    <td>0.8919 ± 0.031</td>
+                  </tr>
+                  <tr>
+                    <td>Hetero-B</td>
+                    <td>2,214 / 1,968</td>
+                    <td>8,750</td>
+                    <td>0.9889 ± 0.002</td>
+                    <td>0.9837 ± 0.005</td>
+                    <td>0.9522 ± 0.020</td>
+                    <td>0.9076 ± 0.036</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="detail-note" data-en="Compared baselines in the paper include NeoDTI, MAGNN, DTI-MGNN, IMCHGAN, SGCL-DTI, MHTAN, MHGNN, AMGDTI, DMHGNN, and MvFNMC. Evaluation metrics include AUC, AUPR, Precision, Recall, F1, and MCC." data-zh="论文中对比的代表性 baseline 包括 NeoDTI、MAGNN、DTI-MGNN、IMCHGAN、SGCL-DTI、MHTAN、MHGNN、AMGDTI、DMHGNN 和 MvFNMC；评价指标包括 AUC、AUPR、Precision、Recall、F1 和 MCC。">论文中对比的代表性 baseline 包括 NeoDTI、MAGNN、DTI-MGNN、IMCHGAN、SGCL-DTI、MHTAN、MHGNN、AMGDTI、DMHGNN 和 MvFNMC；评价指标包括 AUC、AUPR、Precision、Recall、F1 和 MCC。</p>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Ablation Findings" data-zh="消融实验结论">消融实验结论</h2>
+            <ul class="detail-list">
+              <li data-en="Replacing heterogeneous subgraphs with homogeneous graphs reduces performance, showing the importance of multi-type biological relations." data-zh="将异构子图替换为同构图会降低性能，说明多类型生物关系对表示学习很关键。">将异构子图替换为同构图会降低性能，说明多类型生物关系对表示学习很关键。</li>
+              <li data-en="Removing edge-type embeddings causes a large decline; the paper reports AUC/AUPR drops of 7.3%/6.4% on Hetero-A and 6.8%/7.1% on Hetero-B." data-zh="去除边类型嵌入会带来明显下降；论文报告 Hetero-A 上 AUC/AUPR 分别下降 7.3%/6.4%，Hetero-B 上下降 6.8%/7.1%。">去除边类型嵌入会带来明显下降；论文报告 Hetero-A 上 AUC/AUPR 分别下降 7.3%/6.4%，Hetero-B 上下降 6.8%/7.1%。</li>
+              <li data-en="Replacing the DTP-Graph module with an MLP also reduces performance, indicating that pair-level graph convolution provides complementary interaction features." data-zh="用 MLP 替换 DTP-Graph 预测模块同样会降低性能，说明 pair-level 图卷积能提供互补的作用对关联信息。">用 MLP 替换 DTP-Graph 预测模块同样会降低性能，说明 pair-level 图卷积能提供互补的作用对关联信息。</li>
+            </ul>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="My Contribution" data-zh="个人贡献">个人贡献</h2>
+            <p class="detail-note" data-en="Summarized from the local project materials, extracted paper text, code structure, and resume record." data-zh="根据本地项目材料、论文提取文本、代码结构与简历记录整理。">根据本地项目材料、论文提取文本、代码结构与简历记录整理。</p>
+            <ul class="detail-list">
+              <li data-en="Reproduced and evaluated 20+ representative DTI baseline models, and helped locate the meta-path dependency bottleneck of traditional path-based methods." data-zh="复现并评测 DTI 领域 20 余种代表性 baseline，协助定位传统路径方法对 Meta-path 的依赖瓶颈。">复现并评测 DTI 领域 20 余种代表性 baseline，协助定位传统路径方法对 Meta-path 的依赖瓶颈。</li>
+              <li data-en="Unified data processing, training, validation, and evaluation workflows, making baseline comparison and model experiments more consistent." data-zh="统一数据处理、训练、验证与评测流程，使 baseline 对比和模型实验具有一致流程。">统一数据处理、训练、验证与评测流程，使 baseline 对比和模型实验具有一致流程。</li>
+              <li data-en="Processed experimental data involving 700+ drug molecules, 1900+ target proteins, and about 1.4 million potential interaction pairs." data-zh="完成包含 700+ 药物分子、1900+ 靶点蛋白、约 140 万潜在作用对的数据处理与实验过程。">完成包含 700+ 药物分子、1900+ 靶点蛋白、约 140 万潜在作用对的数据处理与实验过程。</li>
+              <li data-en="Participated in core experiments, result comparison, and analysis of metrics including AUC, AUPR, Precision, Recall, F1, and MCC." data-zh="参与核心实验与结果对比，围绕 AUC、AUPR、Precision、Recall、F1、MCC 等指标进行整理分析。">参与核心实验与结果对比，围绕 AUC、AUPR、Precision、Recall、F1、MCC 等指标进行整理分析。</li>
+              <li data-en="Participated in organizing the paper content and experimental evidence for the dual-channel subgraph framework." data-zh="参与论文内容整理与写作，围绕双通道子图框架补充实验依据与结果说明。">参与论文内容整理与写作，围绕双通道子图框架补充实验依据与结果说明。</li>
+            </ul>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Keywords" data-zh="技术关键词">技术关键词</h2>
+            <div class="project-tags">
+              <span>Drug-Target Interaction</span>
+              <span>DTI</span>
+              <span>Heterogeneous Graph</span>
+              <span>Graph Neural Network</span>
+              <span>Subgraph Attention</span>
+              <span>Meta-path</span>
+              <span>Edge-type Attention</span>
+              <span>DTP-Graph</span>
+              <span>PyTorch</span>
+              <span>Bioinformatics</span>
+            </div>
+          </section>
+
+          <div class="detail-actions">
+            <a class="button button-secondary" href="../projects.html" data-en="Back to Projects" data-zh="返回项目目录">返回项目目录</a>
+          </div>
+        </section>
+      </div>
+    </article>
+  </main>
+  <script src="../language.js"></script>
+</body>
+</html>

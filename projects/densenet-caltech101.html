@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="基于 DenseNet121 的 Caltech-101 图像识别与对比研究。">
+  <title>DenseNet121 Caltech-101 | 于书蘅</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav shell" aria-label="主导航">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">*</span><span data-en="Home" data-zh="首页">Home</span></a>
+      <div class="nav-right">
+        <div class="nav-links">
+          <a href="../about.html" data-en="About" data-zh="关于我">About</a>
+          <a class="active" href="../projects.html" data-en="Projects" data-zh="项目">Projects</a>
+          <div class="nav-dropdown" data-dropdown>
+            <button class="nav-dropdown-toggle" type="button" aria-expanded="false" data-dropdown-toggle data-en="Life" data-zh="生活">Life</button>
+            <div class="nav-dropdown-menu">
+              <a href="../moments.html" data-en="Moments" data-zh="动态">Moments</a>
+              <a href="../todo.html" data-en="Lists" data-zh="清单">Lists</a>
+              <a href="../reading.html" data-en="Books & Films" data-zh="书影">Books & Films</a>
+            </div>
+          </div>
+          <a href="../blog.html" data-en="Blog" data-zh="博客">Blog</a>
+        </div>
+        <button class="language-toggle" type="button" aria-label="切换中英文" data-lang-toggle>中文</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-main">
+    <article class="project-detail shell">
+      <a class="text-link back-link" href="../projects.html" data-en="Back to Projects" data-zh="返回项目目录">返回项目目录</a>
+
+      <div class="project-detail-head">
+        <p class="eyebrow" data-en="Image Classification / Deep Learning" data-zh="图像分类 / 深度学习项目">图像分类 / 深度学习项目</p>
+        <h1 data-en="Caltech-101 Image Classification and Comparative Study Based on DenseNet121" data-zh="基于 DenseNet121 的 Caltech-101 图像识别与对比研究">基于 DenseNet121 的 Caltech-101 图像识别与对比研究</h1>
+        <p class="detail-lead" data-en="This project focuses on the Caltech-101 multi-class image classification task. We built a DenseNet121 transfer learning pipeline with data augmentation, classifier redesign, and training tuning, then compared its behavior with ResNet50." data-zh="本项目面向 Caltech-101 多类别图像分类任务，基于 DenseNet121 构建迁移学习方案，通过数据增强、分类器改造和训练调优完成图像识别实验，并与 ResNet50 进行对比分析，验证不同模型在该任务上的表现差异。">本项目面向 Caltech-101 多类别图像分类任务，基于 DenseNet121 构建迁移学习方案，通过数据增强、分类器改造和训练调优完成图像识别实验，并与 ResNet50 进行对比分析，验证不同模型在该任务上的表现差异。</p>
+      </div>
+
+      <div class="detail-grid">
+        <aside class="detail-meta">
+          <dl class="info-list">
+            <div><dt data-en="English Title" data-zh="英文标题">英文标题</dt><dd>Caltech-101 Image Classification and Comparative Study Based on DenseNet121</dd></div>
+            <div><dt data-en="Time" data-zh="时间">时间</dt><dd>2025.09</dd></div>
+            <div><dt data-en="Role" data-zh="角色">角色</dt><dd data-en="Core Member" data-zh="核心成员">核心成员</dd></div>
+            <div><dt data-en="Type" data-zh="类型">类型</dt><dd data-en="Image Classification / Deep Learning" data-zh="图像分类 / 深度学习项目">图像分类 / 深度学习项目</dd></div>
+            <div><dt data-en="Main Model" data-zh="主模型">主模型</dt><dd>DenseNet121</dd></div>
+            <div><dt data-en="Compared Model" data-zh="对比模型">对比模型</dt><dd>ResNet50</dd></div>
+          </dl>
+        </aside>
+
+        <section class="detail-content">
+          <section class="detail-block">
+            <h2 data-en="Background and Task" data-zh="背景与任务">背景与任务</h2>
+            <p data-en="Caltech-101 contains object images across 101 categories, with varied intra-class backgrounds and fine-grained category differences. The project uses this dataset to evaluate whether a deep convolutional model with transfer learning can learn stable visual representations under limited samples per class." data-zh="Caltech-101 覆盖 101 个物体类别，每类图片数量不完全均衡，且包含背景、姿态和细粒度类别差异。项目以该数据集作为多类别图像分类任务，检验基于迁移学习的深度卷积网络能否在每类样本有限的条件下学习稳定的视觉特征。">Caltech-101 覆盖 101 个物体类别，每类图片数量不完全均衡，且包含背景、姿态和细粒度类别差异。项目以该数据集作为多类别图像分类任务，检验基于迁移学习的深度卷积网络能否在每类样本有限的条件下学习稳定的视觉特征。</p>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Technical Route" data-zh="技术路线">技术路线</h2>
+            <div class="route-grid">
+              <article>
+                <span>01</span>
+                <h3 data-en="Data Loading" data-zh="数据读取与划分">数据读取与划分</h3>
+                <p data-en="Implement a Caltech101Dataset class, filter out BACKGROUND_Google, read images by category, and split each class into training and test sets at an 8:2 ratio." data-zh="实现 Caltech101Dataset 数据集类，排除 BACKGROUND_Google 类别，按类别读取图片，并按 8:2 划分训练集与测试集。">实现 Caltech101Dataset 数据集类，排除 BACKGROUND_Google 类别，按类别读取图片，并按 8:2 划分训练集与测试集。</p>
+              </article>
+              <article>
+                <span>02</span>
+                <h3 data-en="Augmentation" data-zh="数据增强">数据增强</h3>
+                <p data-en="Resize inputs to 224x224, apply random horizontal flip, random rotation within 10 degrees, color jitter, tensor conversion, and ImageNet normalization." data-zh="将输入统一到 224×224，使用随机水平翻转、10 度内随机旋转、亮度/对比度/饱和度扰动、张量转换和 ImageNet 均值方差标准化。">将输入统一到 224×224，使用随机水平翻转、10 度内随机旋转、亮度/对比度/饱和度扰动、张量转换和 ImageNet 均值方差标准化。</p>
+              </article>
+              <article>
+                <span>03</span>
+                <h3 data-en="DenseNet121 Transfer Learning" data-zh="DenseNet121 迁移学习">DenseNet121 迁移学习</h3>
+                <p data-en="Load torchvision DenseNet121 with ImageNet pretrained weights and replace its classifier with a two-layer fully connected head." data-zh="加载 torchvision 中基于 ImageNet 预训练的 DenseNet121，并将原分类器替换为两层全连接分类头。">加载 torchvision 中基于 ImageNet 预训练的 DenseNet121，并将原分类器替换为两层全连接分类头。</p>
+              </article>
+              <article>
+                <span>04</span>
+                <h3 data-en="Training and Comparison" data-zh="训练与对比">训练与对比</h3>
+                <p data-en="Train for 30 epochs, save the best checkpoint by test accuracy, draw loss/accuracy curves, and compare with ResNet50 through recognition examples and confusion matrices." data-zh="训练 30 轮，按测试准确率保存最佳模型，绘制 loss/accuracy 曲线，并通过识别示例和混淆矩阵与 ResNet50 进行对比。">训练 30 轮，按测试准确率保存最佳模型，绘制 loss/accuracy 曲线，并通过识别示例和混淆矩阵与 ResNet50 进行对比。</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Model Design and Implementation" data-zh="模型设计与实现">模型设计与实现</h2>
+            <ul class="detail-list">
+              <li data-en="DenseNet121 uses torchvision.models.densenet121 with ImageNet pretrained weights, making use of the feature extraction ability learned from large-scale natural images." data-zh="DenseNet121 使用 torchvision.models.densenet121，并加载 ImageNet 预训练权重，复用大规模自然图像上学习到的特征提取能力。">DenseNet121 使用 torchvision.models.densenet121，并加载 ImageNet 预训练权重，复用大规模自然图像上学习到的特征提取能力。</li>
+              <li data-en="The original classifier is replaced with Linear(in_features, 512), ReLU, Dropout(0.5), and Linear(512, num_classes)." data-zh="原始分类器被替换为 Linear(in_features, 512)、ReLU、Dropout(0.5)、Linear(512, num_classes) 的两层全连接头。">原始分类器被替换为 Linear(in_features, 512)、ReLU、Dropout(0.5)、Linear(512, num_classes) 的两层全连接头。</li>
+              <li data-en="The training uses CrossEntropyLoss, Adam optimizer, learning rate 0.0005, weight decay 1e-5, batch size 32, and StepLR decay every 10 epochs with gamma 0.5." data-zh="训练使用 CrossEntropyLoss、Adam 优化器，学习率 0.0005、weight decay 1e-5、batch size 32，并使用 StepLR 每 10 轮将学习率乘以 0.5。">训练使用 CrossEntropyLoss、Adam 优化器，学习率 0.0005、weight decay 1e-5、batch size 32，并使用 StepLR 每 10 轮将学习率乘以 0.5。</li>
+              <li data-en="The ResNet50 comparison model is implemented separately and trained under the same Caltech-101 image size and preprocessing style for comparative analysis." data-zh="ResNet50 对比模型单独实现，在相同 224×224 输入尺寸与类似预处理流程下训练，用于分析不同卷积结构在该任务上的表现差异。">ResNet50 对比模型单独实现，在相同 224×224 输入尺寸与类似预处理流程下训练，用于分析不同卷积结构在该任务上的表现差异。</li>
+            </ul>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Experimental Results" data-zh="实验结果">实验结果</h2>
+            <div class="metric-grid">
+              <article class="metric-card metric-card-strong">
+                <span data-en="Final Test Accuracy" data-zh="最终测试准确率">最终测试准确率</span>
+                <strong>93.94%</strong>
+                <p data-en="DenseNet121 result reported in the presentation." data-zh="汇报材料中给出的 DenseNet121 测试集结果。">汇报材料中给出的 DenseNet121 测试集结果。</p>
+              </article>
+              <article class="metric-card">
+                <span data-en="Training" data-zh="训练设置">训练设置</span>
+                <strong>30</strong>
+                <p data-en="epochs, batch size 32, initial learning rate 0.0005." data-zh="训练轮数，batch size 32，初始学习率 0.0005。">训练轮数，batch size 32，初始学习率 0.0005。</p>
+              </article>
+              <article class="metric-card">
+                <span data-en="Split" data-zh="数据划分">数据划分</span>
+                <strong>8:2</strong>
+                <p data-en="training and test split by category." data-zh="按类别划分训练集与测试集。">按类别划分训练集与测试集。</p>
+              </article>
+            </div>
+
+            <div class="result-table-wrap">
+              <table class="result-table">
+                <thead>
+                  <tr>
+                    <th data-en="Model" data-zh="模型">模型</th>
+                    <th data-en="Backbone" data-zh="主干网络">主干网络</th>
+                    <th data-en="Pretraining" data-zh="预训练">预训练</th>
+                    <th data-en="Evaluation" data-zh="评估方式">评估方式</th>
+                    <th data-en="Result / Observation" data-zh="结果 / 观察">结果 / 观察</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>DenseNet121</td>
+                    <td data-en="Dense connections + transfer learning" data-zh="密集连接 + 迁移学习">密集连接 + 迁移学习</td>
+                    <td>ImageNet</td>
+                    <td data-en="Test accuracy, loss/accuracy curves, confusion matrix" data-zh="测试准确率、损失/准确率曲线、混淆矩阵">测试准确率、损失/准确率曲线、混淆矩阵</td>
+                    <td data-en="Final test accuracy reaches 93.94%; training accuracy converges close to 100%, and test accuracy remains around the low 90% range." data-zh="最终测试准确率达到 93.94%；训练准确率接近 100%，测试准确率稳定在 90% 以上。">最终测试准确率达到 93.94%；训练准确率接近 100%，测试准确率稳定在 90% 以上。</td>
+                  </tr>
+                  <tr>
+                    <td>ResNet50</td>
+                    <td data-en="Bottleneck residual blocks" data-zh="Bottleneck 残差结构">Bottleneck 残差结构</td>
+                    <td data-en="Project comparison implementation" data-zh="项目对比实现">项目对比实现</td>
+                    <td data-en="Recognition examples and confusion matrix" data-zh="识别示例与混淆矩阵">识别示例与混淆矩阵</td>
+                    <td data-en="The confusion matrix shows stronger misclassification into the 'others' group for several fine-grained classes than DenseNet121." data-zh="混淆矩阵显示，相比 DenseNet121，ResNet50 在若干细分类别上更容易被归入 others。">混淆矩阵显示，相比 DenseNet121，ResNet50 在若干细分类别上更容易被归入 others。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="detail-note" data-en="The DenseNet confusion matrix summarizes 10 representative classes plus an 'others' group. Several categories such as Leopards, Motorbikes, accordion, airplanes, ant, barrel, and bass reach 100% row-wise recognition in this visualization." data-zh="DenseNet 混淆矩阵以 10 个代表类别 + others 进行可视化，其中 Leopards、Motorbikes、accordion、airplanes、ant、barrel、bass 等类别在该可视化中达到行归一化 100% 识别。">DenseNet 混淆矩阵以 10 个代表类别 + others 进行可视化，其中 Leopards、Motorbikes、accordion、airplanes、ant、barrel、bass 等类别在该可视化中达到行归一化 100% 识别。</p>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="My Contribution" data-zh="个人贡献">个人贡献</h2>
+            <p class="detail-note" data-en="Summarized from the project code, presentation, result figures, and existing project description." data-zh="根据项目代码、PPT 汇报、结果图与既有项目描述整理。">根据项目代码、PPT 汇报、结果图与既有项目描述整理。</p>
+            <ul class="detail-list">
+              <li data-en="Implemented and organized the DenseNet121 transfer learning classification pipeline for Caltech-101." data-zh="实现并整理基于 DenseNet121 的 Caltech-101 迁移学习分类流程。">实现并整理基于 DenseNet121 的 Caltech-101 迁移学习分类流程。</li>
+              <li data-en="Completed data loading, category filtering, 8:2 split, preprocessing, and data augmentation design." data-zh="完成数据读取、类别过滤、8:2 划分、预处理与数据增强策略设计。">完成数据读取、类别过滤、8:2 划分、预处理与数据增强策略设计。</li>
+              <li data-en="Rebuilt the DenseNet121 classifier head with a two-layer fully connected structure and Dropout for Caltech-101 classification." data-zh="针对 Caltech-101 任务重构 DenseNet121 分类头，加入两层全连接结构与 Dropout。">针对 Caltech-101 任务重构 DenseNet121 分类头，加入两层全连接结构与 Dropout。</li>
+              <li data-en="Built the training and testing workflow, saved best/final checkpoints, and generated loss/accuracy curves." data-zh="搭建训练与测试流程，保存 best/final 模型权重，并生成 loss/accuracy 曲线。">搭建训练与测试流程，保存 best/final 模型权重，并生成 loss/accuracy 曲线。</li>
+              <li data-en="Compared DenseNet121 with ResNet50 through recognition examples and confusion matrix visualization, then summarized the results for the report." data-zh="通过识别示例和混淆矩阵可视化对比 DenseNet121 与 ResNet50，并整理实验结果用于汇报。">通过识别示例和混淆矩阵可视化对比 DenseNet121 与 ResNet50，并整理实验结果用于汇报。</li>
+            </ul>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Keywords" data-zh="技术关键词">技术关键词</h2>
+            <div class="project-tags">
+              <span>DenseNet121</span>
+              <span>Caltech-101</span>
+              <span>Image Classification</span>
+              <span>Transfer Learning</span>
+              <span>Data Augmentation</span>
+              <span>ResNet50</span>
+              <span>PyTorch</span>
+              <span>Deep Learning</span>
+              <span>Computer Vision</span>
+            </div>
+          </section>
+
+          <div class="detail-actions">
+            <a class="button button-secondary" href="../projects.html" data-en="Back to Projects" data-zh="返回项目目录">返回项目目录</a>
+          </div>
+        </section>
+      </div>
+    </article>
+  </main>
+  <script src="../language.js"></script>
+</body>
+</html>

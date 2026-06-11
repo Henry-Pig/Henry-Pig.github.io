@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ConvNeXt V2 论文复现与 GRN 模块改进项目。">
+  <title>ConvNeXt V2 | 于书蘅</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav shell" aria-label="主导航">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">*</span><span data-en="Home" data-zh="首页">Home</span></a>
+      <div class="nav-right">
+        <div class="nav-links">
+          <a href="../about.html" data-en="About" data-zh="关于我">About</a>
+          <a class="active" href="../projects.html" data-en="Projects" data-zh="项目">Projects</a>
+          <div class="nav-dropdown" data-dropdown>
+            <button class="nav-dropdown-toggle" type="button" aria-expanded="false" data-dropdown-toggle data-en="Life" data-zh="生活">Life</button>
+            <div class="nav-dropdown-menu">
+              <a href="../moments.html" data-en="Moments" data-zh="动态">Moments</a>
+              <a href="../todo.html" data-en="Lists" data-zh="清单">Lists</a>
+              <a href="../reading.html" data-en="Books & Films" data-zh="书影">Books & Films</a>
+            </div>
+          </div>
+          <a href="../blog.html" data-en="Blog" data-zh="博客">Blog</a>
+        </div>
+        <button class="language-toggle" type="button" aria-label="切换中英文" data-lang-toggle>中文</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-main">
+    <article class="project-detail shell">
+      <a class="text-link back-link" href="../projects.html" data-en="Back to Projects" data-zh="返回项目目录">返回项目目录</a>
+
+      <div class="project-detail-head">
+        <p class="eyebrow" data-en="Paper Reproduction / Deep Learning" data-zh="论文复现 / 深度学习项目">论文复现 / 深度学习项目</p>
+        <h1 data-en="ConvNeXt V2 Paper Reproduction and Improvement" data-zh="ConvNeXt V2 论文复现与改进">ConvNeXt V2 论文复现与改进</h1>
+        <p class="detail-lead" data-en="This project reproduced ConvNeXt V2 and explored improvements around the GRN module. Based on the original FCMAE and GRN design, we implemented LightlyGRN and DGRN variants, then compared their behavior on CIFAR-100 fine-tuning experiments." data-zh="本项目围绕 ConvNeXt V2 的论文复现与 GRN 模块改进展开。在理解原始 ConvNeXt V2、FCMAE 和 GRN 的基础上，进一步实现 LightlyGRN 与 DGRN 等改进方案，并通过 CIFAR-100 微调实验比较不同模块对模型性能、参数量与训练表现的影响。">本项目围绕 ConvNeXt V2 的论文复现与 GRN 模块改进展开。在理解原始 ConvNeXt V2、FCMAE 和 GRN 的基础上，进一步实现 LightlyGRN 与 DGRN 等改进方案，并通过 CIFAR-100 微调实验比较不同模块对模型性能、参数量与训练表现的影响。</p>
+      </div>
+
+      <div class="detail-grid">
+        <aside class="detail-meta">
+          <dl class="info-list">
+            <div><dt data-en="Time" data-zh="时间">时间</dt><dd>2025.10 - 2025.11</dd></div>
+            <div><dt data-en="Role" data-zh="角色">角色</dt><dd data-en="Core Member" data-zh="核心成员">核心成员</dd></div>
+            <div><dt data-en="Type" data-zh="类型">类型</dt><dd data-en="Paper Reproduction / Deep Learning" data-zh="论文复现 / 深度学习项目">论文复现 / 深度学习项目</dd></div>
+            <div><dt data-en="Dataset" data-zh="数据集">数据集</dt><dd>CIFAR-100</dd></div>
+            <div><dt data-en="Base Model" data-zh="基线模型">基线模型</dt><dd>ConvNeXt V2 Tiny</dd></div>
+          </dl>
+        </aside>
+
+        <section class="detail-content">
+          <section class="detail-block">
+            <h2 data-en="Background and Motivation" data-zh="背景与动机">背景与动机</h2>
+            <p data-en="ConvNeXt V2 combines Fully Convolutional Masked AutoEncoder with Global Response Normalization. According to the project report, directly applying masked autoencoding to ConvNets can suffer from information leakage caused by dense sliding windows, while ConvNeXt features may also show channel activation redundancy and feature collapse. FCMAE addresses the pretraining form, and GRN enhances inter-channel competition through global response normalization." data-zh="ConvNeXt V2 将全卷积掩码自编码器 FCMAE 与全局响应归一化 GRN 共同设计。根据项目汇报材料，直接把 MAE 套到卷积网络上会受到密集滑动窗口带来的掩码区域信息泄露影响，ConvNeXt 特征中也可能出现通道激活冗余与特征坍缩；FCMAE 负责解决卷积网络的掩码自编码预训练形式，GRN 则通过全局响应归一化增强通道之间的竞争。">ConvNeXt V2 将全卷积掩码自编码器 FCMAE 与全局响应归一化 GRN 共同设计。根据项目汇报材料，直接把 MAE 套到卷积网络上会受到密集滑动窗口带来的掩码区域信息泄露影响，ConvNeXt 特征中也可能出现通道激活冗余与特征坍缩；FCMAE 负责解决卷积网络的掩码自编码预训练形式，GRN 则通过全局响应归一化增强通道之间的竞争。</p>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Technical Route" data-zh="技术路线">技术路线</h2>
+            <div class="route-grid">
+              <article>
+                <span>01</span>
+                <h3 data-en="Reproduce Baseline" data-zh="复现原始模型">复现原始模型</h3>
+                <p data-en="Read the official ConvNeXt V2 implementation and reproduce the Tiny model's fine-tuning workflow under local hardware constraints." data-zh="阅读 ConvNeXt V2 官方实现，在本地算力约束下复现 Tiny 模型的微调流程。">阅读 ConvNeXt V2 官方实现，在本地算力约束下复现 Tiny 模型的微调流程。</p>
+              </article>
+              <article>
+                <span>02</span>
+                <h3 data-en="Understand FCMAE and GRN" data-zh="理解 FCMAE 与 GRN">理解 FCMAE 与 GRN</h3>
+                <p data-en="Analyze sparse convolution based FCMAE pretraining and the GRN module's L2 global response aggregation, normalization, affine calibration, and residual path." data-zh="分析基于稀疏卷积的 FCMAE 预训练流程，以及 GRN 的 L2 全局响应聚合、通道归一化、仿射校准与残差连接。">分析基于稀疏卷积的 FCMAE 预训练流程，以及 GRN 的 L2 全局响应聚合、通道归一化、仿射校准与残差连接。</p>
+              </article>
+              <article>
+                <span>03</span>
+                <h3 data-en="Implement LightlyGRN" data-zh="实现 LightlyGRN">实现 LightlyGRN</h3>
+                <p data-en="Use 1x1 channel reduction, depthwise convolution, low-dimensional response normalization, and expansion to replace the original GRN path." data-zh="使用 1x1 降维、深度卷积、低维响应归一化与升维恢复，作为原文 GRN 的轻量化替代路径。">使用 1x1 降维、深度卷积、低维响应归一化与升维恢复，作为原文 GRN 的轻量化替代路径。</p>
+              </article>
+              <article>
+                <span>04</span>
+                <h3 data-en="Explore DGRN" data-zh="探索 DGRN">探索 DGRN</h3>
+                <p data-en="The report designs DGRN as a dynamic GRN variant with a lightweight gating branch, aiming to adapt feature calibration to each input." data-zh="汇报材料将 DGRN 设计为带轻量门控分支的动态 GRN 变体，希望让特征校准权重随输入自适应变化。">汇报材料将 DGRN 设计为带轻量门控分支的动态 GRN 变体，希望让特征校准权重随输入自适应变化。</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Core Improvements" data-zh="核心改进">核心改进</h2>
+            <ul class="detail-list">
+              <li data-en="Original GRN computes the L2 norm over spatial dimensions, normalizes each channel response by the average response, then applies learnable gamma and beta with a residual connection." data-zh="原始 GRN 对空间维度进行 L2 范数聚合，再用通道平均响应进行归一化，最后通过可学习的 gamma / beta 与残差连接完成特征校准。">原始 GRN 对空间维度进行 L2 范数聚合，再用通道平均响应进行归一化，最后通过可学习的 gamma / beta 与残差连接完成特征校准。</li>
+              <li data-en="LightlyGRN, implemented as MobileGRN in the submitted code, first projects features from C channels to C/r channels, performs depthwise convolution and low-dimensional response normalization, then expands the features back to C channels. Its goal is to reduce the direct high-dimensional normalization cost." data-zh="LightlyGRN 在提交代码中以 MobileGRN 形式实现：先将特征从 C 通道投影到 C/r 通道，在低维空间进行深度卷积与响应归一化，再升维回 C 通道，目标是降低高维特征上直接归一化的计算压力。">LightlyGRN 在提交代码中以 MobileGRN 形式实现：先将特征从 C 通道投影到 C/r 通道，在低维空间进行深度卷积与响应归一化，再升维回 C 通道，目标是降低高维特征上直接归一化的计算压力。</li>
+              <li data-en="DGRN is described in the report as keeping the GRN core while adding a dynamic gating branch: 1x1 reduction, GELU, 1x1 expansion, and sigmoid weights, so the normalized response can be modulated adaptively." data-zh="DGRN 在汇报材料中被描述为保留 GRN 主干，同时增加动态门控分支：1x1 降维、GELU、1x1 升维与 Sigmoid 权重，使归一化响应能够进行自适应调制。">DGRN 在汇报材料中被描述为保留 GRN 主干，同时增加动态门控分支：1x1 降维、GELU、1x1 升维与 Sigmoid 权重，使归一化响应能够进行自适应调制。</li>
+              <li data-en="The reproduction strategy shifted from full ImageNet pretraining to direct fine-tuning on CIFAR-100 because 800-epoch pretraining and the ImageNet-1K dataset were not feasible on a single RTX 4060 setup." data-zh="受单张 RTX 4060 算力与 ImageNet-1K 数据规模限制，项目策略从完整 800 epoch 预训练调整为在 CIFAR-100 上直接微调，并增加日志记录用于实验分析。">受单张 RTX 4060 算力与 ImageNet-1K 数据规模限制，项目策略从完整 800 epoch 预训练调整为在 CIFAR-100 上直接微调，并增加日志记录用于实验分析。</li>
+            </ul>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Experimental Results" data-zh="实验结果">实验结果</h2>
+            <p class="detail-note" data-en="Results are summarized from the project report and exported slide figures. The final comparison uses the report's last-20-epoch average chart." data-zh="结果整理自项目汇报 PDF 与导出的实验图表。最终对比采用汇报材料中的后 20 个 epoch 平均结果图。">结果整理自项目汇报 PDF 与导出的实验图表。最终对比采用汇报材料中的后 20 个 epoch 平均结果图。</p>
+            <div class="metric-grid">
+              <article class="metric-card">
+                <span data-en="Dataset" data-zh="数据集">数据集</span>
+                <strong>CIFAR-100</strong>
+                <p data-en="Fine-tuning experiment with ConvNeXt V2 Tiny." data-zh="基于 ConvNeXt V2 Tiny 的微调实验。">基于 ConvNeXt V2 Tiny 的微调实验。</p>
+              </article>
+              <article class="metric-card metric-card-strong">
+                <span data-en="Best Top-1" data-zh="最佳 Top-1">最佳 Top-1</span>
+                <strong>77.1%</strong>
+                <p data-en="ConvNeXt-V2-DGRN in the final comparison." data-zh="最终对比中 ConvNeXt-V2-DGRN 的结果。">最终对比中 ConvNeXt-V2-DGRN 的结果。</p>
+              </article>
+              <article class="metric-card">
+                <span data-en="Environment" data-zh="实验环境">实验环境</span>
+                <strong>PyTorch</strong>
+                <p data-en="WSL, Docker, PyTorch 1.10, CUDA 11.1." data-zh="WSL、Docker、PyTorch 1.10、CUDA 11.1。">WSL、Docker、PyTorch 1.10、CUDA 11.1。</p>
+              </article>
+            </div>
+            <div class="result-table-wrap">
+              <table class="result-table">
+                <thead>
+                  <tr>
+                    <th data-en="Model / Module" data-zh="模型 / 模块">模型 / 模块</th>
+                    <th>Top-1</th>
+                    <th>Top-5</th>
+                    <th data-en="Train Acc." data-zh="训练准确率">训练准确率</th>
+                    <th data-en="Parameters" data-zh="参数量">参数量</th>
+                    <th data-en="Conclusion" data-zh="结论">结论</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>ConvNeXt-V2-GRN</td>
+                    <td>76.6%</td>
+                    <td>93.1%</td>
+                    <td>75.2%</td>
+                    <td data-en="Not clearly extracted" data-zh="材料未清晰提取">材料未清晰提取</td>
+                    <td data-en="Original GRN baseline." data-zh="原始 GRN 基线。">原始 GRN 基线。</td>
+                  </tr>
+                  <tr>
+                    <td>ConvNeXt-V2-Tiny-GRN / LightlyGRN</td>
+                    <td>69.6%</td>
+                    <td>84.7%</td>
+                    <td>68.3%</td>
+                    <td>53,881,540</td>
+                    <td data-en="Explored lightweight normalization, but accuracy was lower in this run." data-zh="完成轻量化归一化探索，但本轮实验精度低于原始 GRN。">完成轻量化归一化探索，但本轮实验精度低于原始 GRN。</td>
+                  </tr>
+                  <tr>
+                    <td>ConvNeXt-V2-DGRN</td>
+                    <td>77.1%</td>
+                    <td>93.4%</td>
+                    <td>75.4%</td>
+                    <td>53,855,044</td>
+                    <td data-en="Best Top-1 and Top-5 among the three compared settings." data-zh="在三组对比中取得最高 Top-1 与 Top-5。">在三组对比中取得最高 Top-1 与 Top-5。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="My Contribution" data-zh="个人贡献">个人贡献</h2>
+            <p class="detail-note" data-en="Summarized from the project report, code structure, and submitted materials." data-zh="根据项目汇报、代码结构与提交材料整理。">根据项目汇报、代码结构与提交材料整理。</p>
+            <ul class="detail-list">
+              <li data-en="Reproduced the baseline fine-tuning workflow and adapted the original ConvNeXt V2 code to the local CIFAR-100 experiment setting." data-zh="负责基线复现与微调流程搭建，将原始 ConvNeXt V2 代码适配到本地 CIFAR-100 实验设置。">负责基线复现与微调流程搭建，将原始 ConvNeXt V2 代码适配到本地 CIFAR-100 实验设置。</li>
+              <li data-en="Integrated MobileGRN / LightlyGRN and DGRN variants into core scripts including utils.py, convnextv2.py, fcmae.py, and convnextv2_sparse.py." data-zh="作为代码集成负责人，将 MobileGRN / LightlyGRN 与 DGRN 相关改动整合到 utils.py、convnextv2.py、fcmae.py、convnextv2_sparse.py 等核心脚本。">作为代码集成负责人，将 MobileGRN / LightlyGRN 与 DGRN 相关改动整合到 utils.py、convnextv2.py、fcmae.py、convnextv2_sparse.py 等核心脚本。</li>
+              <li data-en="Debugged environment and dependency issues such as MinkowskiEngine errors, ImportError, and TypeError, and helped decide the strategy shift to direct fine-tuning." data-zh="解决 MinkowskiEngine 依赖错误、ImportError、TypeError 等调试问题，并主导确定从完整预训练转向直接微调的实验策略。">解决 MinkowskiEngine 依赖错误、ImportError、TypeError 等调试问题，并主导确定从完整预训练转向直接微调的实验策略。</li>
+              <li data-en="Compared original GRN, LightlyGRN, and DGRN through training logs and exported figures, and summarized the results into the course report presentation." data-zh="基于训练日志与导出图表，对原始 GRN、LightlyGRN 与 DGRN 进行对比分析，并整理到课程汇报材料中。">基于训练日志与导出图表，对原始 GRN、LightlyGRN 与 DGRN 进行对比分析，并整理到课程汇报材料中。</li>
+            </ul>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Keywords" data-zh="技术关键词">技术关键词</h2>
+            <div class="project-tags">
+              <span>ConvNeXt V2</span>
+              <span>FCMAE</span>
+              <span>GRN</span>
+              <span>LightlyGRN</span>
+              <span>DGRN</span>
+              <span>CIFAR-100</span>
+              <span>Image Classification</span>
+              <span>PyTorch</span>
+              <span>Deep Learning</span>
+            </div>
+          </section>
+
+          <div class="detail-actions">
+            <a class="button button-secondary" href="../projects.html" data-en="Back to Projects" data-zh="返回项目目录">返回项目目录</a>
+          </div>
+        </section>
+      </div>
+    </article>
+  </main>
+  <script src="../language.js"></script>
+</body>
+</html>

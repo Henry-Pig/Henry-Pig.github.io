@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="复杂运动场景下篮球持球人身份重识别算法开发项目。">
+  <title>Basketball ReID | 于书蘅</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav shell" aria-label="主导航">
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">*</span><span data-en="Home" data-zh="首页">Home</span></a>
+      <div class="nav-right">
+        <div class="nav-links">
+          <a href="../about.html" data-en="About" data-zh="关于我">About</a>
+          <a class="active" href="../projects.html" data-en="Projects" data-zh="项目">Projects</a>
+          <div class="nav-dropdown" data-dropdown>
+            <button class="nav-dropdown-toggle" type="button" aria-expanded="false" data-dropdown-toggle data-en="Life" data-zh="生活">Life</button>
+            <div class="nav-dropdown-menu">
+              <a href="../moments.html" data-en="Moments" data-zh="动态">Moments</a>
+              <a href="../todo.html" data-en="Lists" data-zh="清单">Lists</a>
+              <a href="../reading.html" data-en="Books & Films" data-zh="书影">Books & Films</a>
+            </div>
+          </div>
+          <a href="../blog.html" data-en="Blog" data-zh="博客">Blog</a>
+        </div>
+        <button class="language-toggle" type="button" aria-label="切换中英文" data-lang-toggle>中文</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-main">
+    <article class="project-detail shell">
+      <a class="text-link back-link" href="../projects.html" data-en="Back to Projects" data-zh="返回项目目录">返回项目目录</a>
+
+      <div class="project-detail-head">
+        <p class="eyebrow" data-en="Research / Algorithm" data-zh="科研 / 算法项目">科研 / 算法项目</p>
+        <h1 data-en="Basketball Ball-Handler Person Re-identification in Complex Motion Scenes" data-zh="复杂运动场景下篮球持球人身份重识别算法开发">复杂运动场景下篮球持球人身份重识别算法开发</h1>
+        <p class="detail-lead" data-en="HE-TransReID is a basketball-oriented person re-identification model built on TransReID. It focuses on the hard cases in real games: similar jerseys, occlusion, drastic pose changes, lighting variation, and motion blur." data-zh="HE-TransReID 是一个面向篮球持球人检索场景的身份重识别模型，基于 TransReID 改进而来，重点处理真实比赛中的相似球衣、遮挡、姿态变化、光照差异与运动模糊问题。">HE-TransReID 是一个面向篮球持球人检索场景的身份重识别模型，基于 TransReID 改进而来，重点处理真实比赛中的相似球衣、遮挡、姿态变化、光照差异与运动模糊问题。</p>
+      </div>
+
+      <div class="detail-grid">
+        <aside class="detail-meta">
+          <dl class="info-list">
+            <div><dt data-en="Time" data-zh="时间">时间</dt><dd data-en="2026.03 - Present" data-zh="2026.03 - 至今">2026.03 - 至今</dd></div>
+            <div><dt data-en="Role" data-zh="角色">角色</dt><dd data-en="Core Member / Team Leader" data-zh="核心成员 / 组长">核心成员 / 组长</dd></div>
+            <div><dt data-en="Type" data-zh="类型">类型</dt><dd data-en="Research / Algorithm" data-zh="科研 / 算法项目">科研 / 算法项目</dd></div>
+            <div><dt data-en="Dataset" data-zh="数据集">数据集</dt><dd>BallShow</dd></div>
+            <div><dt data-en="Code" data-zh="代码链接">代码链接</dt><dd><a href="https://github.com/Henry-Pig/HE-TransReID" target="_blank" rel="noopener">HE-TransReID</a></dd></div>
+          </dl>
+        </aside>
+
+        <section class="detail-content">
+          <section class="detail-block">
+            <h2 data-en="Project Overview" data-zh="项目简介">项目简介</h2>
+            <p data-en="The project comes from the A11 problem of the 17th China Students Service Outsourcing Innovation and Entrepreneurship Competition. In basketball video services, the model receives a query crop of a ball-handler and retrieves the same player from a gallery without relying on continuous tracking. The goal is to support player search, highlight generation, and basketball video analysis under complex motion scenes." data-zh="本项目来源于第十七届中国大学生服务外包创新创业大赛 A11 赛题。面向篮球视频业务场景，模型输入一张持球人 Query 裁剪图像，在不依赖连续轨迹追踪的前提下，从 Gallery 中检索同一球员，用于支撑球员检索、个人集锦生成与篮球视频分析。">本项目来源于第十七届中国大学生服务外包创新创业大赛 A11 赛题。面向篮球视频业务场景，模型输入一张持球人 Query 裁剪图像，在不依赖连续轨迹追踪的前提下，从 Gallery 中检索同一球员，用于支撑球员检索、个人集锦生成与篮球视频分析。</p>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Technical Route" data-zh="技术路线">技术路线</h2>
+            <div class="route-grid">
+              <article>
+                <span>01</span>
+                <h3 data-en="TransReID Backbone" data-zh="TransReID 基线">TransReID 基线</h3>
+                <p data-en="Use a ViT-based TransReID framework with SIE embeddings as the starting point for global representation and local identity modeling." data-zh="以 ViT 结构的 TransReID 为基线，引入 SIE 嵌入，作为全局表征与局部身份建模的基础。">以 ViT 结构的 TransReID 为基线，引入 SIE 嵌入，作为全局表征与局部身份建模的基础。</p>
+              </article>
+              <article>
+                <span>02</span>
+                <h3 data-en="Enhanced Local Modeling" data-zh="增强局部建模">增强局部建模</h3>
+                <p data-en="Restore patch tokens into a 2D grid and split them by rows and columns to preserve spatial continuity around jersey numbers, protectors, shoes, and body structure." data-zh="将 patch token 恢复为二维网格，沿横纵方向确定性切分，保留号码、护具、鞋履和人体结构区域的空间连续性。">将 patch token 恢复为二维网格，沿横纵方向确定性切分，保留号码、护具、鞋履和人体结构区域的空间连续性。</p>
+              </article>
+              <article>
+                <span>03</span>
+                <h3 data-en="Hyper-Connection" data-zh="Hyper-Connection">Hyper-Connection</h3>
+                <p data-en="Replace ordinary residual paths with lightweight hyper-connections to improve cross-layer information flow and training stability." data-zh="使用轻量超连接替代普通残差路径，增强跨层信息传递，并缓解梯度消失与表示坍缩之间的矛盾。">使用轻量超连接替代普通残差路径，增强跨层信息传递，并缓解梯度消失与表示坍缩之间的矛盾。</p>
+              </article>
+              <article>
+                <span>04</span>
+                <h3 data-en="A-Jaccard Re-ranking" data-zh="A-Jaccard 重排序">A-Jaccard 重排序</h3>
+                <p data-en="Use camera-aware Jaccard re-ranking as an optional refinement step, separating intra-camera and inter-camera neighborhoods to reduce camera bias." data-zh="将相机感知 Jaccard 重排序作为可选精排模块，区分同相机与跨相机近邻，减少相机偏差对排序结果的影响。">将相机感知 Jaccard 重排序作为可选精排模块，区分同相机与跨相机近邻，减少相机偏差对排序结果的影响。</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Core Improvements" data-zh="核心改进">核心改进</h2>
+            <ul class="detail-list">
+              <li data-en="Built HE-TransReID on top of TransReID for basketball ball-handler retrieval, keeping the final fused feature at 768 dimensions for practical inference." data-zh="基于 TransReID 构建 HE-TransReID，用于篮球持球人身份检索，并保持最终融合特征为 768 维以兼顾推理效率。">基于 TransReID 构建 HE-TransReID，用于篮球持球人身份检索，并保持最终融合特征为 768 维以兼顾推理效率。</li>
+              <li data-en="Improved JPM by replacing random shift and shuffle with bidirectional spatial partition, producing four vertical and four horizontal local branches." data-zh="改进 JPM 模块：用双向空间划分替代随机移位与混洗，形成 4 个纵向局部分支和 4 个横向局部分支。">改进 JPM 模块：用双向空间划分替代随机移位与混洗，形成 4 个纵向局部分支和 4 个横向局部分支。</li>
+              <li data-en="Introduced Hyper-Connection into the Transformer backbone. The final selected setting is SHC x2, which balances representation ability and stability." data-zh="在 Transformer backbone 中引入 Hyper-Connection，最终选择稳定性更好的 SHC×2 配置，在表达能力和训练稳定性之间取得平衡。">在 Transformer backbone 中引入 Hyper-Connection，最终选择稳定性更好的 SHC×2 配置，在表达能力和训练稳定性之间取得平衡。</li>
+              <li data-en="Designed a lightweight MLP dynamic fusion module to assign confidence weights to local features, replacing fixed concatenation or equal-weight fusion." data-zh="设计轻量 MLP 动态局部特征融合模块，为不同局部区域分配置信权重，替代固定拼接或等权融合。">设计轻量 MLP 动态局部特征融合模块，为不同局部区域分配置信权重，替代固定拼接或等权融合。</li>
+              <li data-en="Used camera-aware A-Jaccard / CA-Jaccard re-ranking to improve retrieval ordering in high-precision offline scenarios." data-zh="使用基于相机感知的 A-Jaccard / CA-Jaccard 重排序，在高精度离线检索场景中进一步优化排序结果。">使用基于相机感知的 A-Jaccard / CA-Jaccard 重排序，在高精度离线检索场景中进一步优化排序结果。</li>
+            </ul>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="My Contribution" data-zh="个人贡献">个人贡献</h2>
+            <p class="detail-note" data-en="Summarized from the submitted project materials and code." data-zh="根据项目提交材料与代码整理。">根据项目提交材料与代码整理。</p>
+            <ul class="detail-list">
+              <li data-en="Proposed and implemented the MLP-based dynamic local feature fusion idea, replacing equal-weight local feature fusion in the baseline." data-zh="提出并实现基于 MLP 的动态权重融合思路，替换原基线中局部特征等权融合的方式。">提出并实现基于 MLP 的动态权重融合思路，替换原基线中局部特征等权融合的方式。</li>
+              <li data-en="Participated in model design, training, evaluation, checkpoint comparison, and result analysis." data-zh="参与模型设计、训练与评估，进行不同 checkpoint 与模型配置的结果对比和分析。">参与模型设计、训练与评估，进行不同 checkpoint 与模型配置的结果对比和分析。</li>
+              <li data-en="Participated in high-precision identification experiments and robustness tests for similar jerseys, pose changes, and occlusion." data-zh="参与高精度识别实验与鲁棒性测试，关注相似球衣、姿态变化和遮挡条件下的检索表现。">参与高精度识别实验与鲁棒性测试，关注相似球衣、姿态变化和遮挡条件下的检索表现。</li>
+              <li data-en="Designed the workflow diagram and mainly wrote the project overview document and detailed technical plan; also prepared the project presentation slides." data-zh="设计工作流程图，主要撰写项目概要介绍文档和项目详细方案文档，并制作项目介绍 PPT。">设计工作流程图，主要撰写项目概要介绍文档和项目详细方案文档，并制作项目介绍 PPT。</li>
+              <li data-en="Served as team leader and coordinated the overall project progress." data-zh="作为组长统筹项目整体推进。">作为组长统筹项目整体推进。</li>
+            </ul>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Experimental Results" data-zh="实验结果">实验结果</h2>
+            <div class="metric-grid">
+              <article class="metric-card">
+                <span data-en="Baseline" data-zh="基线模型">基线模型</span>
+                <strong>91.1% / 93.6%</strong>
+                <p data-en="mAP / Rank-1, no re-ranking" data-zh="mAP / Rank-1，未使用重排序">mAP / Rank-1，未使用重排序</p>
+              </article>
+              <article class="metric-card">
+                <span>HE-TransReID</span>
+                <strong>91.9% / 94.8%</strong>
+                <p data-en="mAP / Rank-1 after fine-tuning, no re-ranking" data-zh="微调后 mAP / Rank-1，未使用重排序">微调后 mAP / Rank-1，未使用重排序</p>
+              </article>
+              <article class="metric-card metric-card-strong">
+                <span>HE-TransReID + CA-reranking</span>
+                <strong>93.4% / 95.5%</strong>
+                <p data-en="Final mAP / Rank-1 after fine-tuning" data-zh="微调后最终 mAP / Rank-1">微调后最终 mAP / Rank-1</p>
+              </article>
+            </div>
+            <div class="result-table-wrap">
+              <table class="result-table">
+                <thead>
+                  <tr>
+                    <th data-en="Scenario" data-zh="实验场景">实验场景</th>
+                    <th>mAP</th>
+                    <th>Rank-1</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-en="White-team fine-grained subset + CA-reranking" data-zh="白队同队细粒度识别 + CA-reranking">白队同队细粒度识别 + CA-reranking</td>
+                    <td>96.8%</td>
+                    <td>96.4%</td>
+                  </tr>
+                  <tr>
+                    <td data-en="Pose / occlusion robustness subset + CA-reranking" data-zh="跨姿态与严重遮挡鲁棒性子集 + CA-reranking">跨姿态与严重遮挡鲁棒性子集 + CA-reranking</td>
+                    <td>91.4%</td>
+                    <td>91.8%</td>
+                  </tr>
+                  <tr>
+                    <td data-en="Feature extraction latency on RTX 4050 Laptop" data-zh="RTX 4050 Laptop 单样本特征提取时延">RTX 4050 Laptop 单样本特征提取时延</td>
+                    <td data-en="Avg 18.02ms" data-zh="平均 18.02ms">平均 18.02ms</td>
+                    <td>P95 27.26ms</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="detail-block">
+            <h2 data-en="Keywords" data-zh="技术关键词">技术关键词</h2>
+            <div class="project-tags">
+              <span>Person ReID</span>
+              <span>TransReID</span>
+              <span>Transformer</span>
+              <span>Hyper-Connection</span>
+              <span>A-Jaccard</span>
+              <span>Re-ranking</span>
+              <span>Basketball Video Analysis</span>
+            </div>
+          </section>
+
+          <div class="detail-actions">
+            <a class="button button-primary" href="https://github.com/Henry-Pig/HE-TransReID" target="_blank" rel="noopener" data-en="View Code" data-zh="查看代码">查看代码</a>
+            <a class="button button-secondary" href="../projects.html" data-en="Back to Projects" data-zh="返回项目目录">返回项目目录</a>
+          </div>
+        </section>
+      </div>
+    </article>
+  </main>
+  <script src="../language.js"></script>
+</body>
+</html>
