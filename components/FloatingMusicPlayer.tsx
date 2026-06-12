@@ -38,6 +38,7 @@ export function FloatingMusicPlayer() {
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
   const [index, setIndex] = useState(0);
   const [expanded, setExpanded] = useState(false);
+  const [showList, setShowList] = useState(false);
   const [position, setPosition] = useState(defaultPosition);
   const [playing, setPlaying] = useState(false);
   const [volume, setVolume] = useState(0.58);
@@ -45,6 +46,7 @@ export function FloatingMusicPlayer() {
   const [duration, setDuration] = useState(0);
   const [mode, setMode] = useState<PlayMode>("loop");
   const [message, setMessage] = useState("");
+  const [language, setLanguage] = useState<"zh" | "en">("zh");
 
   const currentTrack = tracks[index] || null;
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -55,7 +57,12 @@ export function FloatingMusicPlayer() {
     loop: { zh: "列表循环", en: "Loop" }
   })[mode], [mode]);
 
+  function t(zh: string, en: string) {
+    return language === "en" ? en : zh;
+  }
+
   useEffect(() => {
+    setLanguage(localStorage.getItem("site-language") === "en" ? "en" : "zh");
     const savedPosition = localStorage.getItem(playerKeys.position);
     const savedVolume = Number(localStorage.getItem(playerKeys.volume));
     const savedMode = localStorage.getItem(playerKeys.mode) as PlayMode | null;
@@ -78,6 +85,15 @@ export function FloatingMusicPlayer() {
     if (Number.isFinite(savedVolume)) setVolume(clamp(savedVolume, 0, 1));
     if (savedMode === "order" || savedMode === "single" || savedMode === "loop") setMode(savedMode);
     if (savedExpanded === "true") setExpanded(true);
+  }, []);
+
+  useEffect(() => {
+    function onLanguageChange(event: Event) {
+      const detail = (event as CustomEvent<{ lang?: string }>).detail;
+      setLanguage(detail?.lang === "en" ? "en" : "zh");
+    }
+    document.addEventListener("site-language-change", onLanguageChange);
+    return () => document.removeEventListener("site-language-change", onLanguageChange);
   }, []);
 
   useEffect(() => {
@@ -226,6 +242,16 @@ export function FloatingMusicPlayer() {
     setMode((current) => current === "order" ? "single" : current === "single" ? "loop" : "order");
   }
 
+  function selectTrack(nextIndex: number) {
+    if (nextIndex === index) {
+      if (!playing) play();
+      return;
+    }
+    setIndex(nextIndex);
+    setPlaying(true);
+    setMessage("");
+  }
+
   function onPointerDown(event: PointerEvent<HTMLButtonElement>) {
     event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = {
@@ -273,7 +299,7 @@ export function FloatingMusicPlayer() {
           <div className="music-player-head">
             <div>
               <p className="eyebrow" data-en="Background Music" data-zh="背景音乐">背景音乐</p>
-              <h2>{currentTrack ? currentTrack.title : <span data-en="No music yet" data-zh="暂无音乐">暂无音乐</span>}</h2>
+              <h2>{currentTrack ? currentTrack.title : t("暂无音乐", "No music yet")}</h2>
               {currentTrack?.artist ? <p>{currentTrack.artist}</p> : null}
             </div>
             <button type="button" className="music-player-close" onClick={() => setExpanded(false)} aria-label="收起">×</button>
@@ -287,7 +313,7 @@ export function FloatingMusicPlayer() {
           <div className="music-player-controls">
             <button type="button" onClick={goPrevious} disabled={!tracks.length} aria-label="上一首">‹</button>
             <button type="button" className="music-main-control" onClick={togglePlay} disabled={!tracks.length}>
-              {playing ? <span data-en="Pause" data-zh="暂停">暂停</span> : <span data-en="Play" data-zh="播放">播放</span>}
+              {playing ? t("暂停", "Pause") : t("播放", "Play")}
             </button>
             <button type="button" onClick={() => goNext()} disabled={!tracks.length} aria-label="下一首">›</button>
           </div>
@@ -299,8 +325,32 @@ export function FloatingMusicPlayer() {
 
           <button type="button" className="music-mode-button" onClick={cycleMode}>
             <span data-en="Mode" data-zh="模式">模式</span>
-            <strong data-en={modeLabel.en} data-zh={modeLabel.zh}>{modeLabel.zh}</strong>
+            <strong>{t(modeLabel.zh, modeLabel.en)}</strong>
           </button>
+
+          <button type="button" className="music-list-toggle" onClick={() => setShowList((current) => !current)}>
+            <span>{t("音乐列表", "Playlist")}</span>
+            <strong>{tracks.length}</strong>
+          </button>
+
+          {showList ? (
+            <div className="music-track-list">
+              {tracks.length ? tracks.map((track, trackIndex) => (
+                <button
+                  className={`music-track-item ${trackIndex === index ? "is-active" : ""}`}
+                  type="button"
+                  key={track.id}
+                  onClick={() => selectTrack(trackIndex)}
+                >
+                  <span>
+                    <strong>{track.title}</strong>
+                    {track.artist ? <em>{track.artist}</em> : null}
+                  </span>
+                  <small>{trackIndex === index && playing ? t("播放中", "Playing") : `#${trackIndex + 1}`}</small>
+                </button>
+              )) : <p className="music-player-message">{t("暂无音乐。", "No music yet.")}</p>}
+            </div>
+          ) : null}
 
           {message ? <p className="music-player-message">{message}</p> : null}
         </div>

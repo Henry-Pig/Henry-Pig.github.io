@@ -51,11 +51,12 @@ export function MusicAdminPanel({ token }: { token: string }) {
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
   const [sortOrder, setSortOrder] = useState("0");
+  const [sortTouched, setSortTouched] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  async function loadTracks() {
+  async function loadTracks(forceAutoSort = false) {
     if (!token) return;
     setMessage("");
     try {
@@ -71,10 +72,17 @@ export function MusicAdminPanel({ token }: { token: string }) {
         setMessage(result.error || "音乐列表加载失败。");
         return;
       }
-      setTracks(result.data || []);
+      const nextTracks = result.data || [];
+      setTracks(nextTracks);
+      if (forceAutoSort || !sortTouched) setSortOrder(String(getNextSortOrder(nextTracks)));
     } catch {
       setMessage("音乐列表加载失败。");
     }
+  }
+
+  function getNextSortOrder(items = tracks) {
+    if (!items.length) return 0;
+    return Math.max(...items.map((track) => Number(track.sortOrder) || 0)) + 1;
   }
 
   useEffect(() => {
@@ -110,9 +118,9 @@ export function MusicAdminPanel({ token }: { token: string }) {
       setFile(null);
       setTitle("");
       setArtist("");
-      setSortOrder("0");
+      setSortTouched(false);
       setMessage("上传成功。");
-      await loadTracks();
+      await loadTracks(true);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "上传失败。");
     } finally {
@@ -193,7 +201,7 @@ export function MusicAdminPanel({ token }: { token: string }) {
         </label>
         <label>
           <span data-en="Sort" data-zh="排序">排序</span>
-          <input type="number" value={sortOrder} onChange={(event) => setSortOrder(event.target.value)} />
+          <input type="number" value={sortOrder} onChange={(event) => { setSortTouched(true); setSortOrder(event.target.value); }} />
         </label>
         <button className="button button-primary" type="submit" disabled={loading || !token}>
           {loading ? <span data-en="Uploading..." data-zh="上传中...">上传中...</span> : <span data-en="Upload Music" data-zh="上传音乐">上传音乐</span>}
