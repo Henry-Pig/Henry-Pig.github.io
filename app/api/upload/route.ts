@@ -16,7 +16,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, data: null, error: "Unauthorized. Please check ADMIN_TOKEN." }, { status: 401 });
     }
 
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN?.trim();
+
+    if (!blobToken) {
       return NextResponse.json({ success: false, data: null, error: "BLOB_READ_WRITE_TOKEN is not configured. You can still paste an image URL manually." }, { status: 503 });
     }
 
@@ -39,11 +41,20 @@ export async function POST(request: Request) {
     const pathname = `uploads/${Date.now()}-${crypto.randomUUID()}.${extension}`;
     const blob = await put(pathname, file, {
       access: "public",
-      contentType: file.type
+      contentType: file.type,
+      token: blobToken
     });
 
     return NextResponse.json({ success: true, data: { url: blob.url }, error: null });
   } catch (error) {
-    return NextResponse.json({ success: false, data: null, error: error instanceof Error ? error.message : "Image upload failed." }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Image upload failed.";
+    const isTokenError = /access denied|valid token|unauthorized|forbidden/i.test(message);
+    return NextResponse.json({
+      success: false,
+      data: null,
+      error: isTokenError
+        ? "Vercel Blob token is invalid for this Blob store. Please reconnect the Blob store to this project, copy the generated BLOB_READ_WRITE_TOKEN again, and redeploy."
+        : message
+    }, { status: isTokenError ? 401 : 500 });
   }
 }
