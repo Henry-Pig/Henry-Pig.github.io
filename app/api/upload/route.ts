@@ -49,12 +49,15 @@ export async function POST(request: Request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Image upload failed.";
     const isTokenError = /access denied|valid token|unauthorized|forbidden/i.test(message);
+    const isPrivateStoreError = /cannot use public access on a private store|configured with private access/i.test(message);
     return NextResponse.json({
       success: false,
       data: null,
-      error: isTokenError
+      error: isPrivateStoreError
+        ? "This Blob Store is private, but the site needs public image URLs. Please create a Public Vercel Blob Store, replace BLOB_READ_WRITE_TOKEN with that store's token, and redeploy."
+        : isTokenError
         ? "Vercel Blob token is invalid for this Blob store. Please reconnect the Blob store to this project, copy the generated BLOB_READ_WRITE_TOKEN again, and redeploy."
         : message
-    }, { status: isTokenError ? 401 : 500 });
+    }, { status: isTokenError || isPrivateStoreError ? 401 : 500 });
   }
 }
