@@ -9,8 +9,8 @@ export default function AdminPage() {
         <section className="page-hero shell">
           <div className="section-heading">
             <p className="eyebrow">Admin</p>
-            <h1 data-en="Add Content" data-zh="添加内容">添加内容</h1>
-            <p className="muted-text" data-en="A lightweight admin page for moments, lists, books, films, blogs, and background music." data-zh="用一个很轻的后台，给动态、清单、书影、博客和背景音乐继续添东西。">用一个很轻的后台，给动态、清单、书影、博客和背景音乐继续添东西。</p>
+            <h1 data-en="Admin Dashboard" data-zh="后台管理">后台管理</h1>
+            <p className="muted-text" data-en="Login first, then manage global settings such as music and access keys." data-zh="请先登录，然后管理背景音乐、访问秘钥等全局设置。">请先登录，然后管理背景音乐、访问秘钥等全局设置。</p>
           </div>
           <AdminPanel />
         </section>
