@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { ACCESS_COOKIE_NAME, hasValidAccessCookie } from "../../../lib/accessControl";
+import { AccessKeyGate } from "../../../components/AccessKeyGate";
 import { MarkdownView } from "../../../components/MarkdownView";
 import { Nav } from "../../../components/Nav";
-import { getProjectBySlug } from "../../../lib/db";
+import { getAccessControlSettings, getProjectBySlug } from "../../../lib/db";
 
 type ProjectDetailProps = {
   params: Promise<{ slug: string }>;
@@ -15,6 +18,30 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
   const project = await getProjectBySlug(slug);
 
   if (!project) notFound();
+
+  const settings = await getAccessControlSettings();
+  const cookieStore = await cookies();
+  const hasAccess = hasValidAccessCookie(settings, cookieStore.get(ACCESS_COOKIE_NAME)?.value);
+
+  if (!hasAccess) {
+    return (
+      <>
+        <Nav active="projects" />
+        <main className="page-main">
+          <section className="page-hero shell">
+            <div className="project-detail-layout">
+              <article className="detail-main">
+                <p className="eyebrow">{project.type}</p>
+                <h1>{project.title}</h1>
+                <AccessKeyGate title={project.title} description="这个项目详情已开启访问保护，请输入查看秘钥。" />
+                <Link className="button button-secondary" href="/projects" data-en="Back to Projects" data-zh="返回项目目录">返回项目目录</Link>
+              </article>
+            </div>
+          </section>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>

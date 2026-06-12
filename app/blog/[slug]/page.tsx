@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { ACCESS_COOKIE_NAME, hasValidAccessCookie } from "../../../lib/accessControl";
+import { AccessKeyGate } from "../../../components/AccessKeyGate";
 import { Nav } from "../../../components/Nav";
 import { MarkdownView } from "../../../components/MarkdownView";
-import { getSiteData } from "../../../lib/db";
+import { getAccessControlSettings, getSiteData } from "../../../lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +27,26 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
             <h1>文章暂时没有找到</h1>
             <p className="muted-text">可能是链接里的 slug 变化了，或者文章已经被删除。</p>
             <Link className="button button-secondary" href="/blog">返回博客列表</Link>
+          </article>
+        </main>
+      </>
+    );
+  }
+
+  const settings = await getAccessControlSettings();
+  const cookieStore = await cookies();
+  const hasAccess = hasValidAccessCookie(settings, cookieStore.get(ACCESS_COOKIE_NAME)?.value);
+
+  if (!hasAccess) {
+    return (
+      <>
+        <Nav active="blog" />
+        <main className="page-main">
+          <article className="page-hero shell blog-article">
+            <p className="eyebrow">{post.category} · {post.date}</p>
+            <h1>{post.title}</h1>
+            <AccessKeyGate title={post.title} description="这篇博客已开启访问保护，请输入查看秘钥。" />
+            <Link className="button button-secondary" href="/blog" data-en="Back to Blog" data-zh="返回博客列表">返回博客列表</Link>
           </article>
         </main>
       </>

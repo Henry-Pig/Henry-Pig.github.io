@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { AccessAdminPanel } from "../../components/AccessAdminPanel";
 import { MusicAdminPanel } from "../../components/MusicAdminPanel";
 
 type ContentType = "moment" | "todo" | "work" | "blog";
@@ -136,6 +137,7 @@ export function AdminPanel() {
       </div>
 
       <MusicAdminPanel token={token} />
+      <AccessAdminPanel token={token} />
     </div>
   );
 }

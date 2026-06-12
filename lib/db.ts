@@ -1,7 +1,8 @@
 import postgres from "postgres";
+import { hashAccessKey } from "./accessControl";
 import { defaultProjects } from "./project-data";
 import { seedData } from "./seed";
-import type { BlogPost, Moment, MusicTrack, ProjectItem, SiteData, TodoItem, WorkItem } from "./types";
+import type { AccessControlSettings, BlogPost, Moment, MusicTrack, ProjectItem, SiteData, TodoItem, WorkItem } from "./types";
 
 const connectionString = process.env.DATABASE_URL;
 const sql = connectionString ? postgres(connectionString, { ssl: "require" }) : null;
@@ -110,6 +111,22 @@ async function ensureSchema() {
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now()
     )
+  `;
+
+  await sql`
+    create table if not exists access_control_settings (
+      id integer primary key default 1,
+      is_enabled boolean not null default false,
+      key_hash text,
+      updated_at timestamptz not null default now(),
+      constraint access_control_singleton check (id = 1)
+    )
+  `;
+
+  await sql`
+    insert into access_control_settings (id, is_enabled, key_hash)
+    values (1, false, null)
+    on conflict (id) do nothing
   `;
 
   await seedEmptyTables();
@@ -261,6 +278,56 @@ export async function getSiteData(): Promise<SiteData> {
 
 export function hasDatabase() {
   return Boolean(sql);
+}
+
+export async function getAccessControlSettings(): Promise<AccessControlSettings> {
+  if (!sql) return { isEnabled: false, hasKey: false, keyHash: null };
+  await ensureSchema();
+  const [settings] = await sql<any[]>`
+    select
+      is_enabled as "isEnabled",
+      key_hash as "keyHash",
+      updated_at::text as "updatedAt"
+    from access_control_settings
+    where id = 1
+  `;
+  return {
+    isEnabled: Boolean(settings?.isEnabled),
+    hasKey: Boolean(settings?.keyHash),
+    keyHash: settings?.keyHash || null,
+    updatedAt: settings?.updatedAt || null
+  };
+}
+
+export async function updateAccessControlSettings(input: { isEnabled?: boolean; accessKey?: string }) {
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureSchema();
+  const current = await getAccessControlSettings();
+  const nextHash = input.accessKey?.trim() ? hashAccessKey(input.accessKey) : current.keyHash || null;
+
+  if (input.isEnabled && !nextHash) {
+    throw new Error("Please set an access key before enabling protection.");
+  }
+
+  const [settings] = await sql<any[]>`
+    update access_control_settings
+    set
+      is_enabled = coalesce(${input.isEnabled ?? null}, is_enabled),
+      key_hash = ${nextHash},
+      updated_at = now()
+    where id = 1
+    returning
+      is_enabled as "isEnabled",
+      key_hash as "keyHash",
+      updated_at::text as "updatedAt"
+  `;
+
+  return {
+    isEnabled: Boolean(settings.isEnabled),
+    hasKey: Boolean(settings.keyHash),
+    keyHash: settings.keyHash,
+    updatedAt: settings.updatedAt
+  } satisfies AccessControlSettings;
 }
 
 function mapMusicTrack(row: any): MusicTrack {

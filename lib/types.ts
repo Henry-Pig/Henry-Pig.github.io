@@ -65,6 +65,13 @@ export type MusicTrack = {
   updatedAt?: string | null;
 };
 
+export type AccessControlSettings = {
+  isEnabled: boolean;
+  hasKey: boolean;
+  keyHash?: string | null;
+  updatedAt?: string | null;
+};
+
 export type ProjectItem = {
   id: number | string;
   title: string;
