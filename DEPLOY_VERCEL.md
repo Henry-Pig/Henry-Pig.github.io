@@ -1,6 +1,6 @@
 # 从 GitHub Pages 迁移到 Vercel
 
-这个项目已经改造成 Next.js 项目，可以部署到 Vercel，并通过 `/admin` 添加动态、清单、书影和博客内容。
+这个项目已经改造成 Next.js 项目，可以部署到 Vercel，并通过 `/admin` 添加动态、清单、书影、博客和背景音乐内容。
 
 ## 1. 安装 Node.js
 
@@ -80,6 +80,7 @@ npm run dev
 - `todos`
 - `works`
 - `blog_posts`
+- `music_tracks`
 
 ## 5. 安装 Vercel CLI，可选
 
@@ -123,14 +124,14 @@ vercel
 
 旧的 `.html` 地址已经配置了重定向，例如 `/about.html` 会跳到 `/about`。
 
-## 8. 图片上传
+## 8. 图片和音乐上传
 
-动态和博客已经支持图片 URL；如果你想直接上传图片，需要在 Vercel 项目里开启 Blob：
+动态、博客和背景音乐上传依赖 Vercel Blob。Blob Store 需要是 Public，这样前台页面才能直接播放图片和音频 URL：
 
 1. 进入 Vercel 项目；
 2. 打开 `Storage`；
-3. 创建一个 Blob Store；
+3. 创建一个 Public Blob Store；
 4. 按 Vercel 提示把 `BLOB_READ_WRITE_TOKEN` 添加到 Environment Variables；
 5. 重新部署。
 
-如果暂时不配置 Blob，后台表单会提示上传不可用，但你仍然可以粘贴外部图片 URL。
+如果暂时不配置 Blob，后台表单会提示上传不可用，但网站其他功能不受影响。音乐元数据会存入 Postgres 的 `music_tracks` 表，前台播放器只读取已启用的音乐。

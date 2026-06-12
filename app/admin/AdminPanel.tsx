@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { MusicAdminPanel } from "../../components/MusicAdminPanel";
 
 type ContentType = "moment" | "todo" | "work" | "blog";
 
@@ -64,19 +65,20 @@ export function AdminPanel() {
   }
 
   return (
-    <div className="admin-grid">
-      <aside className="admin-note">
-        <p className="eyebrow">Admin</p>
-        <h2>内容后台</h2>
-        <p>这里是一个轻量后台，适合你本人添加动态、清单、书影和博客。部署到 Vercel 后，需要配置 `DATABASE_URL` 和 `ADMIN_TOKEN`。</p>
-        <p>访客不会看到这个表单的密码，但请不要把真实密码写进代码里。</p>
-      </aside>
+    <div className="admin-stack">
+      <div className="admin-grid">
+        <aside className="admin-note">
+          <p className="eyebrow">Admin</p>
+          <h2 data-en="Content Admin" data-zh="内容后台">内容后台</h2>
+          <p data-en="A lightweight admin page for adding moments, lists, books, films, blogs, and music." data-zh="这里是一个轻量后台，适合你本人添加动态、清单、书影、博客和音乐。">这里是一个轻量后台，适合你本人添加动态、清单、书影、博客和音乐。</p>
+          <p data-en="Visitors will not see this token field, but never write the real token into source code." data-zh="访客不会看到这个表单的密码，但请不要把真实密码写进代码里。">访客不会看到这个表单的密码，但请不要把真实密码写进代码里。</p>
+        </aside>
 
-      <form className="admin-form" onSubmit={handleSubmit}>
-        <label>
-          管理密码
-          <input type="password" value={token} onChange={(event) => setToken(event.target.value)} placeholder="对应 Vercel 的 ADMIN_TOKEN" required />
-        </label>
+        <form className="admin-form" onSubmit={handleSubmit}>
+          <label>
+            <span data-en="Admin Token" data-zh="管理密码">管理密码</span>
+            <input type="password" value={token} onChange={(event) => setToken(event.target.value)} placeholder="对应 Vercel 的 ADMIN_TOKEN" required />
+          </label>
 
         <label>
           添加类型
@@ -128,9 +130,12 @@ export function AdminPanel() {
           </>
         )}
 
-        <button className="button button-primary" type="submit" disabled={isSubmitting}>{isSubmitting ? "保存中..." : "保存内容"}</button>
-        {message ? <p className="admin-message">{message}</p> : null}
-      </form>
+          <button className="button button-primary" type="submit" disabled={isSubmitting}>{isSubmitting ? "保存中..." : "保存内容"}</button>
+          {message ? <p className="admin-message">{message}</p> : null}
+        </form>
+      </div>
+
+      <MusicAdminPanel token={token} />
     </div>
   );
 }

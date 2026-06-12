@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { FloatingMusicPlayer } from "../components/FloatingMusicPlayer";
 import "../styles.css";
 
 export const metadata: Metadata = {
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <Script id="theme-initializer" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitializer }} />
         {children}
+        <FloatingMusicPlayer />
         <Script src="/language.js" strategy="afterInteractive" />
       </body>
     </html>

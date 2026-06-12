@@ -1,7 +1,7 @@
 import postgres from "postgres";
 import { defaultProjects } from "./project-data";
 import { seedData } from "./seed";
-import type { BlogPost, Moment, ProjectItem, SiteData, TodoItem, WorkItem } from "./types";
+import type { BlogPost, Moment, MusicTrack, ProjectItem, SiteData, TodoItem, WorkItem } from "./types";
 
 const connectionString = process.env.DATABASE_URL;
 const sql = connectionString ? postgres(connectionString, { ssl: "require" }) : null;
@@ -90,6 +90,23 @@ async function ensureSchema() {
       repo_url text,
       demo_url text,
       sort_order integer not null default 0,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    )
+  `;
+
+  await sql`
+    create table if not exists music_tracks (
+      id serial primary key,
+      title text not null,
+      artist text,
+      url text not null,
+      filename text,
+      mime_type text,
+      size_bytes bigint,
+      duration double precision,
+      sort_order integer not null default 0,
+      is_enabled boolean not null default true,
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now()
     )
@@ -244,6 +261,141 @@ export async function getSiteData(): Promise<SiteData> {
 
 export function hasDatabase() {
   return Boolean(sql);
+}
+
+function mapMusicTrack(row: any): MusicTrack {
+  return {
+    id: row.id,
+    title: row.title,
+    artist: row.artist,
+    url: row.url,
+    filename: row.filename,
+    mimeType: row.mimeType,
+    sizeBytes: row.sizeBytes === null || row.sizeBytes === undefined ? null : Number(row.sizeBytes),
+    duration: row.duration === null || row.duration === undefined ? null : Number(row.duration),
+    sortOrder: Number(row.sortOrder || 0),
+    isEnabled: Boolean(row.isEnabled),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt
+  };
+}
+
+export async function getPublicMusicTracks() {
+  if (!sql) return [];
+  await ensureSchema();
+  const rows = await sql<any[]>`
+    select
+      id,
+      title,
+      artist,
+      url,
+      duration,
+      sort_order as "sortOrder",
+      is_enabled as "isEnabled"
+    from music_tracks
+    where is_enabled = true
+    order by sort_order asc, created_at asc, id asc
+  `;
+  return rows.map(mapMusicTrack);
+}
+
+export async function getAllMusicTracks() {
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureSchema();
+  const rows = await sql<any[]>`
+    select
+      id,
+      title,
+      artist,
+      url,
+      filename,
+      mime_type as "mimeType",
+      size_bytes as "sizeBytes",
+      duration,
+      sort_order as "sortOrder",
+      is_enabled as "isEnabled",
+      created_at::text as "createdAt",
+      updated_at::text as "updatedAt"
+    from music_tracks
+    order by sort_order asc, created_at asc, id asc
+  `;
+  return rows.map(mapMusicTrack);
+}
+
+export async function createMusicTrack(input: Omit<MusicTrack, "id" | "createdAt" | "updatedAt">) {
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureSchema();
+  const [track] = await sql<any[]>`
+    insert into music_tracks (title, artist, url, filename, mime_type, size_bytes, duration, sort_order, is_enabled)
+    values (
+      ${input.title},
+      ${input.artist || null},
+      ${input.url},
+      ${input.filename || null},
+      ${input.mimeType || null},
+      ${input.sizeBytes || null},
+      ${input.duration || null},
+      ${input.sortOrder || 0},
+      ${input.isEnabled}
+    )
+    returning
+      id,
+      title,
+      artist,
+      url,
+      filename,
+      mime_type as "mimeType",
+      size_bytes as "sizeBytes",
+      duration,
+      sort_order as "sortOrder",
+      is_enabled as "isEnabled",
+      created_at::text as "createdAt",
+      updated_at::text as "updatedAt"
+  `;
+  return mapMusicTrack(track);
+}
+
+export async function updateMusicTrack(id: number | string, input: Partial<Pick<MusicTrack, "title" | "artist" | "sortOrder" | "isEnabled" | "duration">>) {
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureSchema();
+  const [track] = await sql<any[]>`
+    update music_tracks
+    set
+      title = coalesce(${input.title ?? null}, title),
+      artist = case when ${input.artist === undefined} then artist else ${input.artist ?? null} end,
+      sort_order = coalesce(${input.sortOrder ?? null}, sort_order),
+      is_enabled = coalesce(${input.isEnabled ?? null}, is_enabled),
+      duration = coalesce(${input.duration ?? null}, duration),
+      updated_at = now()
+    where id = ${Number(id)}
+    returning
+      id,
+      title,
+      artist,
+      url,
+      filename,
+      mime_type as "mimeType",
+      size_bytes as "sizeBytes",
+      duration,
+      sort_order as "sortOrder",
+      is_enabled as "isEnabled",
+      created_at::text as "createdAt",
+      updated_at::text as "updatedAt"
+  `;
+  if (!track) throw new Error("Music track not found.");
+  return mapMusicTrack(track);
+}
+
+export async function deleteMusicTrack(id: number | string) {
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureSchema();
+  const [deleted] = await sql<any[]>`
+    delete from music_tracks
+    where id = ${Number(id)}
+    returning id, url
+  `;
+  if (!deleted) throw new Error("Music track not found.");
+  return deleted as { id: number; url: string };
 }
 
 export async function createMoment(input: Omit<Moment, "id">) {

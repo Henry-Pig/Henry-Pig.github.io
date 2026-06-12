@@ -50,6 +50,21 @@ export type SiteData = {
   blogPosts: BlogPost[];
 };
 
+export type MusicTrack = {
+  id: number | string;
+  title: string;
+  artist?: string | null;
+  url: string;
+  filename?: string | null;
+  mimeType?: string | null;
+  sizeBytes?: number | null;
+  duration?: number | null;
+  sortOrder: number;
+  isEnabled: boolean;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+};
+
 export type ProjectItem = {
   id: number | string;
   title: string;
