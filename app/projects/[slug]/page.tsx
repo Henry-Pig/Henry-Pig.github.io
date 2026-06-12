@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MarkdownView } from "../../../components/MarkdownView";
 import { Nav } from "../../../components/Nav";
 import { getProjectBySlug } from "../../../lib/db";
 
@@ -35,7 +36,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailProps) 
               {(project.content || []).map((section) => (
                 <section className="detail-section" key={section.title}>
                   <h2>{section.title}</h2>
-                  {section.body ? <p>{section.body}</p> : null}
+                  {section.body ? <MarkdownView content={section.body} /> : null}
                   {section.metrics?.length ? (
                     <div className="metric-grid">
                       {section.metrics.map((metric) => (

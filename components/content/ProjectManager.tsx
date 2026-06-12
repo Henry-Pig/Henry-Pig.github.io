@@ -88,7 +88,7 @@ export function ProjectManager({ initialProjects }: { initialProjects: ProjectIt
         role: project.role || "",
         summary: project.summary,
         description: project.description || "",
-        content: (project.content || []).map((section) => `${section.title}\n${section.body || ""}\n${(section.items || []).map((item) => `- ${item}`).join("\n")}`).join("\n\n"),
+        content: (project.content || []).map((section) => section.body || (section.items || []).map((item) => `- ${item}`).join("\n")).filter(Boolean).join("\n\n"),
         techStack: project.techStack.join(", "),
         coverImage: project.coverImage || "",
         repoUrl: project.repoUrl || "",
@@ -202,7 +202,7 @@ export function ProjectManager({ initialProjects }: { initialProjects: ProjectIt
               <label>角色<input value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })} /></label>
               <label>简介<textarea value={form.summary} onChange={(event) => setForm({ ...form, summary: event.target.value })} required /></label>
               <label>英文/补充标题<input value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
-              <label>详情正文<textarea value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} /></label>
+              <label>详情正文 Markdown<textarea value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} /></label>
               <label>技术栈，逗号分隔<input value={form.techStack} onChange={(event) => setForm({ ...form, techStack: event.target.value })} /></label>
               <label>封面图 URL<input value={form.coverImage} onChange={(event) => setForm({ ...form, coverImage: event.target.value })} /></label>
               <label>代码链接<input value={form.repoUrl} onChange={(event) => setForm({ ...form, repoUrl: event.target.value })} /></label>
