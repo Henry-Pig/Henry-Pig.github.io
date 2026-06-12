@@ -1,22 +1,40 @@
-import { put } from "@vercel/blob";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
-import { adminUnauthorizedResponse, isAdminRequest } from "../../../../../lib/adminAuth";
 import { createMusicTrack } from "../../../../../lib/db";
 
-const allowedTypes = new Set(["audio/mpeg", "audio/wav", "audio/ogg", "audio/mp4", "audio/flac", "audio/x-flac"]);
+const allowedTypes = new Set(["audio/mpeg", "audio/mp3", "audio/wav", "audio/x-wav", "audio/ogg", "audio/mp4", "audio/x-m4a", "audio/flac", "audio/x-flac"]);
 const allowedExtensions = new Set(["mp3", "wav", "ogg", "m4a", "flac"]);
 const maxAudioSize = 50 * 1024 * 1024;
 
-function cleanFileName(name: string) {
-  return name.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/-+/g, "-");
+type MusicUploadPayload = {
+  adminToken?: string;
+  title?: string;
+  artist?: string;
+  sortOrder?: number;
+  filename?: string;
+  mimeType?: string;
+  sizeBytes?: number;
+};
+
+function parsePayload(payload: string | null): MusicUploadPayload {
+  if (!payload) return {};
+  try {
+    return JSON.parse(payload) as MusicUploadPayload;
+  } catch {
+    return {};
+  }
+}
+
+function isAuthorized(token?: string) {
+  return Boolean(process.env.ADMIN_TOKEN && token === process.env.ADMIN_TOKEN);
+}
+
+function extensionFromPathname(pathname: string) {
+  return pathname.split("?")[0].split(".").pop()?.toLowerCase() || "";
 }
 
 export async function POST(request: Request) {
   try {
-    if (!isAdminRequest(request)) {
-      return NextResponse.json(adminUnauthorizedResponse(), { status: 401 });
-    }
-
     const blobToken = process.env.BLOB_READ_WRITE_TOKEN?.trim();
     if (!blobToken) {
       return NextResponse.json({
@@ -26,50 +44,54 @@ export async function POST(request: Request) {
       }, { status: 503 });
     }
 
-    const formData = await request.formData();
-    const file = formData.get("file");
-    const title = String(formData.get("title") || "").trim();
-    const artist = String(formData.get("artist") || "").trim();
-    const sortOrder = Number(formData.get("sortOrder") || 0);
+    const body = await request.json() as HandleUploadBody;
+    const response = await handleUpload({
+      token: blobToken,
+      request,
+      body,
+      onBeforeGenerateToken: async (pathname, clientPayload) => {
+        const payload = parsePayload(clientPayload);
+        const extension = extensionFromPathname(pathname);
 
-    if (!(file instanceof File)) {
-      return NextResponse.json({ success: false, data: null, error: "No audio file provided." }, { status: 400 });
-    }
+        if (!isAuthorized(payload.adminToken)) {
+          throw new Error("Unauthorized. Please check ADMIN_TOKEN.");
+        }
 
-    const extension = file.name.split(".").pop()?.toLowerCase() || "";
-    if (!allowedTypes.has(file.type) || !allowedExtensions.has(extension)) {
-      return NextResponse.json({
-        success: false,
-        data: null,
-        error: "Only mp3, wav, ogg, m4a, and flac audio files are allowed."
-      }, { status: 400 });
-    }
+        if (!allowedExtensions.has(extension)) {
+          throw new Error("Only mp3, wav, ogg, m4a, and flac audio files are allowed.");
+        }
 
-    if (file.size > maxAudioSize) {
-      return NextResponse.json({ success: false, data: null, error: "Audio size must be 50MB or smaller." }, { status: 400 });
-    }
-
-    const safeName = cleanFileName(file.name || `track.${extension}`);
-    const pathname = `music/${Date.now()}-${crypto.randomUUID()}-${safeName}`;
-    const blob = await put(pathname, file, {
-      access: "public",
-      contentType: file.type,
-      token: blobToken
+        return {
+          allowedContentTypes: Array.from(allowedTypes),
+          maximumSizeInBytes: maxAudioSize,
+          tokenPayload: JSON.stringify({
+            title: payload.title || "",
+            artist: payload.artist || "",
+            sortOrder: payload.sortOrder || 0,
+            filename: payload.filename || pathname.split("/").pop() || "music",
+            mimeType: payload.mimeType || "",
+            sizeBytes: payload.sizeBytes || null
+          })
+        };
+      },
+      onUploadCompleted: async ({ blob, tokenPayload }) => {
+        const payload = parsePayload(tokenPayload || null);
+        const filename = payload.filename || blob.pathname.split("/").pop() || "music";
+        await createMusicTrack({
+          title: payload.title || filename.replace(/\.[^.]+$/, ""),
+          artist: payload.artist || null,
+          url: blob.url,
+          filename,
+          mimeType: payload.mimeType || null,
+          sizeBytes: payload.sizeBytes || null,
+          duration: null,
+          sortOrder: Number(payload.sortOrder || 0),
+          isEnabled: true
+        });
+      }
     });
 
-    const track = await createMusicTrack({
-      title: title || safeName.replace(/\.[^.]+$/, ""),
-      artist: artist || null,
-      url: blob.url,
-      filename: file.name,
-      mimeType: file.type,
-      sizeBytes: file.size,
-      duration: null,
-      sortOrder: Number.isFinite(sortOrder) ? sortOrder : 0,
-      isEnabled: true
-    });
-
-    return NextResponse.json({ success: true, data: track, error: null });
+    return NextResponse.json(response);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Music upload failed.";
     const isTokenError = /access denied|valid token|unauthorized|forbidden/i.test(message);

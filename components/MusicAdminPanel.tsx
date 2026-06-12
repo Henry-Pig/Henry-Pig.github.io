@@ -1,5 +1,6 @@
 "use client";
 
+import { upload as uploadBlob } from "@vercel/blob/client";
 import { FormEvent, useEffect, useState } from "react";
 import type { MusicTrack } from "../lib/types";
 
@@ -13,6 +14,35 @@ function formatBytes(value?: number | null) {
   if (!value) return "-";
   if (value < 1024 * 1024) return `${Math.round(value / 1024)} KB`;
   return `${(value / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function cleanFileName(name: string) {
+  return name.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/-+/g, "-");
+}
+
+function getAudioContentType(file: File) {
+  if (file.type) return file.type;
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  const fallback: Record<string, string> = {
+    mp3: "audio/mpeg",
+    wav: "audio/wav",
+    ogg: "audio/ogg",
+    m4a: "audio/mp4",
+    flac: "audio/flac"
+  };
+  return fallback[extension || ""] || "audio/mpeg";
+}
+
+async function parseApiError(response: Response, fallback: string) {
+  const text = await response.text();
+  if (!text) return fallback;
+  try {
+    const result = JSON.parse(text) as ApiResult<unknown>;
+    return result.error || fallback;
+  } catch {
+    if (response.status === 413) return "音乐文件太大，已超过部署平台请求限制。请使用客户端直传或换小一点的文件。";
+    return text.slice(0, 180) || fallback;
+  }
 }
 
 export function MusicAdminPanel({ token }: { token: string }) {
@@ -32,6 +62,10 @@ export function MusicAdminPanel({ token }: { token: string }) {
       const response = await fetch("/api/admin/music", {
         headers: { "x-admin-token": token }
       });
+      if (!response.ok) {
+        setMessage(await parseApiError(response, "音乐列表加载失败。"));
+        return;
+      }
       const result = await response.json() as ApiResult<MusicTrack[]>;
       if (!response.ok || !result.success) {
         setMessage(result.error || "音乐列表加载失败。");
@@ -56,73 +90,84 @@ export function MusicAdminPanel({ token }: { token: string }) {
     setLoading(true);
     setMessage("");
 
-    const formData = new FormData();
-    formData.set("file", file);
-    formData.set("title", title);
-    formData.set("artist", artist);
-    formData.set("sortOrder", sortOrder);
-
     try {
-      const response = await fetch("/api/admin/music/upload", {
-        method: "POST",
-        headers: { "x-admin-token": token },
-        body: formData
+      const safeName = cleanFileName(file.name || "music");
+      await uploadBlob(`music/${Date.now()}-${safeName}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/admin/music/upload",
+        multipart: file.size > 8 * 1024 * 1024,
+        contentType: getAudioContentType(file),
+        clientPayload: JSON.stringify({
+          adminToken: token,
+          title,
+          artist,
+          sortOrder: Number(sortOrder || 0),
+          filename: file.name,
+          mimeType: getAudioContentType(file),
+          sizeBytes: file.size
+        })
       });
-      const result = await response.json() as ApiResult<MusicTrack>;
-      if (!response.ok || !result.success || !result.data) {
-        setMessage(result.error || "上传失败。");
-        return;
-      }
-      setTracks((current) => [...current, result.data as MusicTrack].sort((a, b) => a.sortOrder - b.sortOrder));
       setFile(null);
       setTitle("");
       setArtist("");
       setSortOrder("0");
       setMessage("上传成功。");
-    } catch {
-      setMessage("上传失败。");
+      await loadTracks();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "上传失败。");
     } finally {
       setLoading(false);
     }
   }
 
+  async function readJson<T>(response: Response, fallback: string) {
+    if (!response.ok) {
+      throw new Error(await parseApiError(response, fallback));
+    }
+    const result = await response.json() as ApiResult<T>;
+    if (!result.success || !result.data) {
+      throw new Error(result.error || fallback);
+    }
+    return result.data;
+  }
+
   async function update(track: MusicTrack, patch: Partial<MusicTrack>) {
     setMessage("");
-    const response = await fetch(`/api/admin/music/${track.id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "x-admin-token": token
-      },
-      body: JSON.stringify({
-        title: patch.title,
-        artist: patch.artist,
-        sortOrder: patch.sortOrder,
-        isEnabled: patch.isEnabled
-      })
-    });
-    const result = await response.json() as ApiResult<MusicTrack>;
-    if (!response.ok || !result.success || !result.data) {
-      setMessage(result.error || "保存失败。");
-      return;
+    try {
+      const response = await fetch(`/api/admin/music/${track.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-token": token
+        },
+        body: JSON.stringify({
+          title: patch.title,
+          artist: patch.artist,
+          sortOrder: patch.sortOrder,
+          isEnabled: patch.isEnabled
+        })
+      });
+      const updated = await readJson<MusicTrack>(response, "保存失败。");
+      setTracks((current) => current.map((item) => item.id === track.id ? updated : item));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "保存失败。");
     }
-    setTracks((current) => current.map((item) => item.id === track.id ? result.data as MusicTrack : item));
   }
 
   async function remove(track: MusicTrack) {
     if (!confirm(`确定删除《${track.title}》吗？`)) return;
     setMessage("");
-    const response = await fetch(`/api/admin/music/${track.id}`, {
-      method: "DELETE",
-      headers: { "x-admin-token": token }
-    });
-    const result = await response.json() as ApiResult<{ id: number | string; blobWarning?: string | null }>;
-    if (!response.ok || !result.success) {
-      setMessage(result.error || "删除失败。");
-      return;
+    try {
+      const response = await fetch(`/api/admin/music/${track.id}`, {
+        method: "DELETE",
+        headers: { "x-admin-token": token }
+      });
+      const result = await readJson<{ id: number | string; blobWarning?: string | null }>(response, "删除失败。");
+      setTracks((current) => current.filter((item) => item.id !== track.id));
+      setMessage(result.blobWarning ? `数据库记录已删除，但 Blob 文件删除失败：${result.blobWarning}` : "删除成功。");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "删除失败。");
     }
-    setTracks((current) => current.filter((item) => item.id !== track.id));
-    setMessage(result.data?.blobWarning ? `数据库记录已删除，但 Blob 文件删除失败：${result.data.blobWarning}` : "删除成功。");
   }
 
   return (
