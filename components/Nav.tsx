@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SettingsPanel } from "./SettingsPanel";
 
 type NavProps = {
   active?: "home" | "about" | "projects" | "life" | "blog";
@@ -29,6 +30,7 @@ export function Nav({ active, lifeActive }: NavProps) {
             </div>
             <Link className={active === "blog" ? "active" : ""} href="/blog" data-en="Blog" data-zh="博客">博客</Link>
           </div>
+          <SettingsPanel />
           <button className="language-toggle" type="button" aria-label="切换中英文" data-lang-toggle>EN</button>
         </div>
       </nav>

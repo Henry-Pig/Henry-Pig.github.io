@@ -22,6 +22,190 @@
   --display-font: "Cormorant Garamond", "EB Garamond", Garamond, "Times New Roman", serif;
   --body-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
   --mono-font: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  --bg: var(--canvas);
+  --panel: var(--surface-card);
+  --panel-strong: var(--surface-dark);
+  --text: var(--ink);
+  --accent: var(--primary);
+  --accent-2: var(--accent-teal);
+  --border: var(--hairline);
+  --shadow: 0 18px 60px rgba(64, 48, 34, 0.08);
+  --radius: 12px;
+  --font-display: var(--display-font);
+  --font-body: var(--body-font);
+  --glass-panel: rgba(250, 249, 245, 0.88);
+  --glass-menu: rgba(250, 249, 245, 0.96);
+  --soft-card: rgba(250, 249, 245, 0.72);
+  --focus-ring: rgba(204, 120, 92, 0.16);
+  --reading-line-height: 1.9;
+  --content-gap: 24px;
+}
+
+html[data-design="dark-academic"] {
+  --primary: #c9a86a;
+  --primary-active: #e1bd78;
+  --ink: #f3eee2;
+  --body: #d2c8b6;
+  --body-strong: #efe6d5;
+  --muted: #9d927e;
+  --muted-soft: #766d5f;
+  --hairline: rgba(232, 211, 168, 0.22);
+  --hairline-soft: rgba(232, 211, 168, 0.14);
+  --canvas: #12100d;
+  --surface-soft: #18140f;
+  --surface-card: #211b14;
+  --surface-dark: #090806;
+  --surface-dark-elevated: #1d1812;
+  --surface-dark-soft: #15110d;
+  --on-primary: #17120b;
+  --on-dark: #f8efe0;
+  --on-dark-soft: #a69b88;
+  --accent-teal: #8cb9a7;
+  --accent-amber: #d8aa5f;
+  --display-font: "Cormorant Garamond", "EB Garamond", Garamond, "Times New Roman", serif;
+  --glass-panel: rgba(18, 16, 13, 0.88);
+  --glass-menu: rgba(33, 27, 20, 0.96);
+  --soft-card: rgba(33, 27, 20, 0.78);
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
+  --focus-ring: rgba(201, 168, 106, 0.18);
+}
+
+html[data-design="glassmorphism"] {
+  --primary: #8d6fd1;
+  --primary-active: #6c50b8;
+  --ink: #211b35;
+  --body: #403859;
+  --body-strong: #2b2440;
+  --muted: #746b8a;
+  --muted-soft: #958ca6;
+  --hairline: rgba(117, 95, 166, 0.2);
+  --hairline-soft: rgba(117, 95, 166, 0.14);
+  --canvas: #fbf8ff;
+  --surface-soft: #f1ecfb;
+  --surface-card: rgba(255, 255, 255, 0.62);
+  --surface-dark: #17112b;
+  --surface-dark-elevated: #251b42;
+  --surface-dark-soft: #201636;
+  --accent-teal: #58b9bd;
+  --accent-amber: #d99972;
+  --glass-panel: rgba(255, 255, 255, 0.62);
+  --glass-menu: rgba(255, 255, 255, 0.76);
+  --soft-card: rgba(255, 255, 255, 0.55);
+  --shadow: 0 28px 90px rgba(96, 73, 142, 0.18);
+  --focus-ring: rgba(141, 111, 209, 0.18);
+}
+
+html[data-design="minimal-light"] {
+  --primary: #5f6f63;
+  --primary-active: #344a39;
+  --ink: #191a18;
+  --body: #3d403a;
+  --body-strong: #252822;
+  --muted: #767a70;
+  --muted-soft: #a0a498;
+  --hairline: #e3e5de;
+  --hairline-soft: #eceee8;
+  --canvas: #fffefb;
+  --surface-soft: #f7f7f1;
+  --surface-card: #ffffff;
+  --surface-dark: #20241f;
+  --surface-dark-elevated: #2c322b;
+  --surface-dark-soft: #252a24;
+  --accent-teal: #6f9282;
+  --accent-amber: #b68b57;
+  --display-font: Georgia, "Times New Roman", serif;
+  --glass-panel: rgba(255, 254, 251, 0.94);
+  --glass-menu: rgba(255, 255, 255, 0.98);
+  --soft-card: rgba(255, 255, 255, 0.86);
+  --shadow: 0 18px 46px rgba(37, 40, 34, 0.07);
+  --focus-ring: rgba(95, 111, 99, 0.16);
+}
+
+html[data-design="cyber-game"] {
+  --primary: #43f0d5;
+  --primary-active: #ff5fd2;
+  --ink: #effcff;
+  --body: #c0d2dc;
+  --body-strong: #e1f6ff;
+  --muted: #819aa8;
+  --muted-soft: #607481;
+  --hairline: rgba(67, 240, 213, 0.22);
+  --hairline-soft: rgba(255, 95, 210, 0.14);
+  --canvas: #080b12;
+  --surface-soft: #0e1420;
+  --surface-card: #121b29;
+  --surface-dark: #05070d;
+  --surface-dark-elevated: #101827;
+  --surface-dark-soft: #0b111c;
+  --on-primary: #061016;
+  --on-dark: #effcff;
+  --on-dark-soft: #8ca2af;
+  --accent-teal: #43f0d5;
+  --accent-amber: #ffcf5a;
+  --display-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+  --glass-panel: rgba(8, 11, 18, 0.9);
+  --glass-menu: rgba(18, 27, 41, 0.96);
+  --soft-card: rgba(18, 27, 41, 0.78);
+  --shadow: 0 24px 80px rgba(0, 255, 220, 0.08);
+  --focus-ring: rgba(67, 240, 213, 0.2);
+}
+
+html[data-resolved-mode="dark"]:not([data-design="dark-academic"]):not([data-design="cyber-game"]) {
+  --ink: #f6f1e8;
+  --body: #d7cec0;
+  --body-strong: #eee5d8;
+  --muted: #a99f91;
+  --muted-soft: #82786d;
+  --hairline: rgba(246, 241, 232, 0.16);
+  --hairline-soft: rgba(246, 241, 232, 0.09);
+  --canvas: #16130f;
+  --surface-soft: #1e1914;
+  --surface-card: #251f18;
+  --surface-dark: #0e0c0a;
+  --surface-dark-elevated: #211b15;
+  --surface-dark-soft: #17120e;
+  --on-primary: #1b120d;
+  --on-dark: #f6f1e8;
+  --on-dark-soft: #a99f91;
+  --glass-panel: rgba(22, 19, 15, 0.9);
+  --glass-menu: rgba(37, 31, 24, 0.96);
+  --soft-card: rgba(37, 31, 24, 0.72);
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+}
+
+html[data-resolved-mode="light"][data-design="dark-academic"],
+html[data-resolved-mode="light"][data-design="cyber-game"] {
+  --canvas: #faf9f5;
+  --surface-soft: #f5f0e8;
+  --surface-card: #fffaf0;
+  --ink: #141413;
+  --body: #3d3d3a;
+  --body-strong: #252523;
+  --muted: #6c6a64;
+  --muted-soft: #8e8b82;
+  --hairline: #e6dfd8;
+  --hairline-soft: #ebe6df;
+  --glass-panel: rgba(250, 249, 245, 0.9);
+  --glass-menu: rgba(250, 249, 245, 0.98);
+  --soft-card: rgba(250, 249, 245, 0.78);
+}
+
+html[data-density="compact"] {
+  --reading-line-height: 1.72;
+  --content-gap: 16px;
+  --radius: 10px;
+}
+
+html[data-design] {
+  --bg: var(--canvas);
+  --panel: var(--surface-card);
+  --panel-strong: var(--surface-dark);
+  --text: var(--ink);
+  --accent: var(--primary);
+  --accent-2: var(--accent-teal);
+  --border: var(--hairline);
+  --font-display: var(--display-font);
+  --font-body: var(--body-font);
 }
 
 .admin-grid {
@@ -635,6 +819,270 @@ h2 {
   cursor: pointer;
   font: 500 14px / 1 var(--body-font);
   padding: 10px 14px;
+}
+
+.settings-trigger {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--canvas);
+  color: var(--ink);
+  cursor: pointer;
+  font: 500 14px / 1 var(--body-font);
+  padding: 10px 14px;
+}
+
+.settings-trigger:hover,
+.language-toggle:hover {
+  border-color: var(--primary);
+}
+
+.settings-trigger-icon {
+  position: relative;
+  display: inline-grid;
+  width: 16px;
+  height: 16px;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+}
+
+.settings-trigger-icon span {
+  width: 5px;
+  height: 5px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+}
+
+.settings-trigger-icon::before,
+.settings-trigger-icon::after {
+  position: absolute;
+  width: 2px;
+  height: 18px;
+  border-radius: 999px;
+  background: currentColor;
+  content: "";
+  opacity: 0.65;
+}
+
+.settings-trigger-icon::after {
+  transform: rotate(90deg);
+}
+
+.settings-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  justify-items: end;
+}
+
+.settings-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(20, 20, 19, 0.32);
+  cursor: default;
+  backdrop-filter: blur(8px);
+}
+
+.settings-panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(440px, 100vw);
+  max-height: 100vh;
+  gap: 24px;
+  overflow-y: auto;
+  border-left: 1px solid var(--hairline);
+  background: var(--glass-menu);
+  box-shadow: -24px 0 80px rgba(20, 20, 19, 0.16);
+  padding: 28px;
+  animation: settings-slide-in 180ms ease forwards;
+}
+
+.settings-head,
+.settings-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.settings-head h2 {
+  margin-top: 6px;
+  color: var(--ink);
+  font-family: var(--display-font);
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.settings-close {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--canvas);
+  color: var(--ink);
+  cursor: pointer;
+  font: 400 20px / 1 var(--body-font);
+}
+
+.settings-section {
+  display: grid;
+  gap: 12px;
+}
+
+.settings-section h3 {
+  margin: 0;
+  color: var(--body-strong);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.settings-section p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.design-options {
+  display: grid;
+  gap: 10px;
+}
+
+.design-option {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 14px;
+  width: 100%;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--soft-card);
+  color: var(--body);
+  cursor: pointer;
+  padding: 12px;
+  text-align: left;
+}
+
+.design-option:hover,
+.design-option.is-selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.design-preview {
+  min-height: 74px;
+  border: 1px solid var(--hairline-soft);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, var(--surface-card), var(--canvas)),
+    radial-gradient(circle at 72% 24%, var(--primary), transparent 38%);
+}
+
+.design-preview[data-preview="dark-academic"] {
+  background:
+    linear-gradient(135deg, #0f0d0a, #211b14),
+    radial-gradient(circle at 75% 22%, #c9a86a, transparent 42%);
+}
+
+.design-preview[data-preview="glassmorphism"] {
+  background:
+    radial-gradient(circle at 25% 25%, rgba(141, 111, 209, 0.42), transparent 34%),
+    radial-gradient(circle at 75% 60%, rgba(88, 185, 189, 0.34), transparent 34%),
+    rgba(255, 255, 255, 0.72);
+}
+
+.design-preview[data-preview="minimal-light"] {
+  background:
+    linear-gradient(180deg, #fffefb 0 32%, #f7f7f1 32% 100%),
+    linear-gradient(90deg, #5f6f63 0 16%, transparent 16%);
+}
+
+.design-preview[data-preview="cyber-game"] {
+  background:
+    linear-gradient(135deg, #080b12, #121b29),
+    radial-gradient(circle at 70% 20%, rgba(67, 240, 213, 0.5), transparent 42%);
+}
+
+.design-option-copy {
+  display: grid;
+  gap: 5px;
+}
+
+.design-option-copy strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.design-option-copy span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.design-option-copy em {
+  width: fit-content;
+  border-radius: 999px;
+  background: var(--canvas);
+  color: var(--primary);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+  padding: 3px 8px;
+}
+
+.segmented-control {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  padding: 4px;
+}
+
+.segmented-control button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: 500 13px / 1 var(--body-font);
+  padding: 8px;
+}
+
+.segmented-control button.is-selected {
+  background: var(--canvas);
+  color: var(--ink);
+  box-shadow: 0 1px 12px rgba(20, 20, 19, 0.06);
+}
+
+.settings-footer {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--hairline);
+  padding-top: 20px;
+}
+
+@keyframes settings-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .darkness-hero {
@@ -1739,5 +2187,180 @@ h2 {
   .blog-row {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+}
+
+html[data-design] body {
+  background:
+    radial-gradient(circle at 82% 8%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 28%),
+    var(--canvas);
+}
+
+html[data-design="glassmorphism"] body {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(141, 111, 209, 0.18), transparent 28%),
+    radial-gradient(circle at 78% 18%, rgba(88, 185, 189, 0.16), transparent 30%),
+    linear-gradient(180deg, var(--canvas), var(--surface-soft));
+}
+
+html[data-design="cyber-game"] body {
+  background:
+    linear-gradient(90deg, rgba(67, 240, 213, 0.04) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 95, 210, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 76% 12%, rgba(67, 240, 213, 0.12), transparent 26%),
+    var(--canvas);
+  background-size: 42px 42px, 42px 42px, auto, auto;
+}
+
+html[data-design] .site-header,
+html[data-design] .content-modal,
+html[data-design] .admin-note,
+html[data-design] .admin-form {
+  background: var(--glass-panel);
+}
+
+html[data-design] .nav-dropdown-menu {
+  background: var(--glass-menu);
+  box-shadow: var(--shadow);
+}
+
+html[data-design] .moment-post {
+  background: var(--soft-card);
+}
+
+html[data-design] .lead-card,
+html[data-design] .feature-card,
+html[data-design] .split-panel,
+html[data-design] .about-card,
+html[data-design] .life-item,
+html[data-design] .blog-card,
+html[data-design] .project-card,
+html[data-design] .detail-meta,
+html[data-design] .detail-content,
+html[data-design] .metric-card,
+html[data-design] .route-grid article,
+html[data-design] .modal-close,
+html[data-design] .inline-form input,
+html[data-design] .inline-form select,
+html[data-design] .inline-form textarea,
+html[data-design] .status-select,
+html[data-design] .admin-form input,
+html[data-design] .admin-form select,
+html[data-design] .admin-form textarea {
+  border-radius: var(--radius);
+}
+
+html[data-design="glassmorphism"] .lead-card,
+html[data-design="glassmorphism"] .feature-card,
+html[data-design="glassmorphism"] .split-panel,
+html[data-design="glassmorphism"] .about-card,
+html[data-design="glassmorphism"] .life-item,
+html[data-design="glassmorphism"] .blog-card,
+html[data-design="glassmorphism"] .project-card,
+html[data-design="glassmorphism"] .detail-meta,
+html[data-design="glassmorphism"] .detail-content,
+html[data-design="glassmorphism"] .moment-post,
+html[data-design="glassmorphism"] .settings-panel {
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+html[data-design="cyber-game"] .project-card,
+html[data-design="cyber-game"] .feature-card,
+html[data-design="cyber-game"] .detail-meta,
+html[data-design="cyber-game"] .detail-content,
+html[data-design="cyber-game"] .settings-panel {
+  box-shadow: inset 0 0 0 1px rgba(67, 240, 213, 0.08), var(--shadow);
+}
+
+html[data-density="compact"] body {
+  line-height: 1.46;
+}
+
+html[data-density="compact"] .page-hero {
+  padding: 72px 0;
+}
+
+html[data-density="compact"] .lead-card,
+html[data-density="compact"] .about-card,
+html[data-density="compact"] .project-card,
+html[data-density="compact"] .detail-meta,
+html[data-density="compact"] .detail-content,
+html[data-density="compact"] .feature-card,
+html[data-density="compact"] .split-panel,
+html[data-density="compact"] .contact-card,
+html[data-density="compact"] .life-item,
+html[data-density="compact"] .blog-card {
+  padding: 24px;
+}
+
+html[data-density="compact"] .project-grid,
+html[data-density="compact"] .feature-grid,
+html[data-density="compact"] .project-timeline,
+html[data-density="compact"] .life-list,
+html[data-density="compact"] .blog-list,
+html[data-density="compact"] .moment-feed {
+  gap: var(--content-gap);
+}
+
+html[data-density="compact"] .markdown-body {
+  line-height: var(--reading-line-height);
+}
+
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 1ms !important;
+}
+
+html[data-motion="reduced"] .darkness-title span:not(.word-gap),
+html[data-motion="reduced"] .home-enter {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+
+  .darkness-title span:not(.word-gap),
+  .home-enter {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .nav-right {
+    gap: 10px;
+  }
+
+  .settings-trigger,
+  .language-toggle {
+    min-height: 38px;
+  }
+
+  .settings-panel {
+    width: min(100vw, 420px);
+    padding: 22px 18px;
+  }
+
+  .design-option {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .design-preview {
+    min-height: 64px;
   }
 }
