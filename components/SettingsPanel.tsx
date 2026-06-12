@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { DEFAULT_DESIGN, isDesignId, registeredDesigns, type DesignId } from "../lib/designs";
 
 type ColorMode = "system" | "light" | "dark";
@@ -61,8 +62,10 @@ export function SettingsPanel() {
   const [colorMode, setColorMode] = useState<ColorMode>(defaults.colorMode);
   const [motion, setMotion] = useState<MotionMode>(defaults.motion);
   const [density, setDensity] = useState<DensityMode>(defaults.density);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const next = readSettings();
     setDesign(next.design);
     setColorMode(next.colorMode);
@@ -120,6 +123,75 @@ export function SettingsPanel() {
     applySettings(defaults);
   }
 
+  const panel = (
+    <div className="settings-layer" role="presentation">
+      <button className="settings-backdrop" type="button" aria-label="关闭设置面板" onClick={() => setOpen(false)} />
+      <aside className="settings-panel" id="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div className="settings-head">
+          <div>
+            <p className="eyebrow" data-en="Personalize" data-zh="个性化">个性化</p>
+            <h2 id="settings-title" data-en="Settings" data-zh="设置">设置</h2>
+          </div>
+          <button className="settings-close" type="button" onClick={() => setOpen(false)} aria-label="关闭">×</button>
+        </div>
+
+        <section className="settings-section">
+          <div className="settings-section-head">
+            <h3 data-en="Page Design" data-zh="页面风格">页面风格</h3>
+            <p data-en="Choose a registered design. It applies across the whole site." data-zh="选择一个已注册风格，会应用到整个网站。">选择一个已注册风格，会应用到整个网站。</p>
+          </div>
+          <div className="design-options">
+            {registeredDesigns.map((item) => (
+              <button
+                className={`design-option ${design === item.id ? "is-selected" : ""}`}
+                type="button"
+                key={item.id}
+                onClick={() => updateDesign(item.id)}
+                aria-pressed={design === item.id}
+              >
+                <span className="design-preview" data-preview={item.id} aria-hidden="true" />
+                <span className="design-option-copy">
+                  <strong data-en={item.nameEn} data-zh={item.nameZh}>{item.nameZh}</strong>
+                  <span data-en={item.descriptionEn} data-zh={item.descriptionZh}>{item.descriptionZh}</span>
+                  <em data-en={item.recommendedEn} data-zh={item.recommendedZh}>{item.recommendedZh}</em>
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <h3 data-en="Color Mode" data-zh="明暗模式">明暗模式</h3>
+          <div className="segmented-control" role="group" aria-label="Color Mode">
+            <button type="button" className={colorMode === "system" ? "is-selected" : ""} onClick={() => updateColorMode("system")} data-en="System" data-zh="跟随系统">跟随系统</button>
+            <button type="button" className={colorMode === "light" ? "is-selected" : ""} onClick={() => updateColorMode("light")} data-en="Light" data-zh="浅色">浅色</button>
+            <button type="button" className={colorMode === "dark" ? "is-selected" : ""} onClick={() => updateColorMode("dark")} data-en="Dark" data-zh="深色">深色</button>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <h3 data-en="Motion" data-zh="动效">动效</h3>
+          <div className="segmented-control" role="group" aria-label="Motion">
+            <button type="button" className={motion === "on" ? "is-selected" : ""} onClick={() => updateMotion("on")} data-en="On" data-zh="开启">开启</button>
+            <button type="button" className={motion === "reduced" ? "is-selected" : ""} onClick={() => updateMotion("reduced")} data-en="Reduced" data-zh="减弱">减弱</button>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <h3 data-en="Reading Density" data-zh="阅读密度">阅读密度</h3>
+          <div className="segmented-control" role="group" aria-label="Reading Density">
+            <button type="button" className={density === "comfortable" ? "is-selected" : ""} onClick={() => updateDensity("comfortable")} data-en="Comfortable" data-zh="舒展">舒展</button>
+            <button type="button" className={density === "compact" ? "is-selected" : ""} onClick={() => updateDensity("compact")} data-en="Compact" data-zh="紧凑">紧凑</button>
+          </div>
+        </section>
+
+        <div className="settings-footer">
+          <button className="button button-secondary" type="button" onClick={resetSettings} data-en="Reset" data-zh="恢复默认">恢复默认</button>
+        </div>
+      </aside>
+    </div>
+  );
+
   return (
     <>
       <button
@@ -132,74 +204,7 @@ export function SettingsPanel() {
         <span className="settings-trigger-icon" aria-hidden="true"><span /></span>
         <span data-en="Settings" data-zh="设置">设置</span>
       </button>
-      {open ? (
-        <div className="settings-layer" role="presentation">
-          <button className="settings-backdrop" type="button" aria-label="关闭设置面板" onClick={() => setOpen(false)} />
-          <aside className="settings-panel" id="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-            <div className="settings-head">
-              <div>
-                <p className="eyebrow" data-en="Personalize" data-zh="个性化">个性化</p>
-                <h2 id="settings-title" data-en="Settings" data-zh="设置">设置</h2>
-              </div>
-              <button className="settings-close" type="button" onClick={() => setOpen(false)} aria-label="关闭">×</button>
-            </div>
-
-            <section className="settings-section">
-              <div className="settings-section-head">
-                <h3 data-en="Page Design" data-zh="页面风格">页面风格</h3>
-                <p data-en="Choose a registered design. It applies across the whole site." data-zh="选择一个已注册风格，会应用到整个网站。">选择一个已注册风格，会应用到整个网站。</p>
-              </div>
-              <div className="design-options">
-                {registeredDesigns.map((item) => (
-                  <button
-                    className={`design-option ${design === item.id ? "is-selected" : ""}`}
-                    type="button"
-                    key={item.id}
-                    onClick={() => updateDesign(item.id)}
-                    aria-pressed={design === item.id}
-                  >
-                    <span className="design-preview" data-preview={item.id} aria-hidden="true" />
-                    <span className="design-option-copy">
-                      <strong data-en={item.nameEn} data-zh={item.nameZh}>{item.nameZh}</strong>
-                      <span data-en={item.descriptionEn} data-zh={item.descriptionZh}>{item.descriptionZh}</span>
-                      <em data-en={item.recommendedEn} data-zh={item.recommendedZh}>{item.recommendedZh}</em>
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section className="settings-section">
-              <h3 data-en="Color Mode" data-zh="明暗模式">明暗模式</h3>
-              <div className="segmented-control" role="group" aria-label="Color Mode">
-                <button type="button" className={colorMode === "system" ? "is-selected" : ""} onClick={() => updateColorMode("system")} data-en="System" data-zh="跟随系统">跟随系统</button>
-                <button type="button" className={colorMode === "light" ? "is-selected" : ""} onClick={() => updateColorMode("light")} data-en="Light" data-zh="浅色">浅色</button>
-                <button type="button" className={colorMode === "dark" ? "is-selected" : ""} onClick={() => updateColorMode("dark")} data-en="Dark" data-zh="深色">深色</button>
-              </div>
-            </section>
-
-            <section className="settings-section">
-              <h3 data-en="Motion" data-zh="动效">动效</h3>
-              <div className="segmented-control" role="group" aria-label="Motion">
-                <button type="button" className={motion === "on" ? "is-selected" : ""} onClick={() => updateMotion("on")} data-en="On" data-zh="开启">开启</button>
-                <button type="button" className={motion === "reduced" ? "is-selected" : ""} onClick={() => updateMotion("reduced")} data-en="Reduced" data-zh="减弱">减弱</button>
-              </div>
-            </section>
-
-            <section className="settings-section">
-              <h3 data-en="Reading Density" data-zh="阅读密度">阅读密度</h3>
-              <div className="segmented-control" role="group" aria-label="Reading Density">
-                <button type="button" className={density === "comfortable" ? "is-selected" : ""} onClick={() => updateDensity("comfortable")} data-en="Comfortable" data-zh="舒展">舒展</button>
-                <button type="button" className={density === "compact" ? "is-selected" : ""} onClick={() => updateDensity("compact")} data-en="Compact" data-zh="紧凑">紧凑</button>
-              </div>
-            </section>
-
-            <div className="settings-footer">
-              <button className="button button-secondary" type="button" onClick={resetSettings} data-en="Reset" data-zh="恢复默认">恢复默认</button>
-            </div>
-          </aside>
-        </div>
-      ) : null}
+      {open && mounted ? createPortal(panel, document.body) : null}
     </>
   );
 }
