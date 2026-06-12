@@ -16,7 +16,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         var colorMode = localStorage.getItem("site-color-mode") || "system";
         var motion = localStorage.getItem("site-motion") || "on";
         var density = localStorage.getItem("site-density") || "comfortable";
-        var validDesigns = ["default", "dark-academic", "glassmorphism", "minimal-light", "cyber-game"];
+        var validDesigns = ["default", "dark-academic", "glassmorphism", "minimal-light", "cyber-game", "resend-dark", "claude-warm", "mongodb-green", "sentry-violet", "voltagent-code", "warp-terminal"];
         if (validDesigns.indexOf(design) === -1) design = "default";
         if (["system", "light", "dark"].indexOf(colorMode) === -1) colorMode = "system";
         if (["on", "reduced"].indexOf(motion) === -1) motion = "on";
