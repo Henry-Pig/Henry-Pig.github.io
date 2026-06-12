@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import { hashAccessKey } from "./accessControl";
+import { createAccessRotationSalt, generateRotatingAccessKey } from "./accessControl";
 import { defaultProjects } from "./project-data";
 import { seedData } from "./seed";
 import type { AccessControlSettings, BlogPost, Moment, MusicTrack, ProjectItem, SiteData, TodoItem, WorkItem } from "./types";
@@ -118,14 +118,17 @@ async function ensureSchema() {
       id integer primary key default 1,
       is_enabled boolean not null default false,
       key_hash text,
+      rotation_salt text,
       updated_at timestamptz not null default now(),
       constraint access_control_singleton check (id = 1)
     )
   `;
 
+  await sql`alter table access_control_settings add column if not exists rotation_salt text`;
+
   await sql`
-    insert into access_control_settings (id, is_enabled, key_hash)
-    values (1, false, null)
+    insert into access_control_settings (id, is_enabled, key_hash, rotation_salt)
+    values (1, false, null, ${createAccessRotationSalt()})
     on conflict (id) do nothing
   `;
 
@@ -287,45 +290,59 @@ export async function getAccessControlSettings(): Promise<AccessControlSettings>
     select
       is_enabled as "isEnabled",
       key_hash as "keyHash",
+      rotation_salt as "rotationSalt",
       updated_at::text as "updatedAt"
     from access_control_settings
     where id = 1
   `;
+  let rotationSalt = settings?.rotationSalt as string | null;
+  if (!rotationSalt) {
+    rotationSalt = createAccessRotationSalt();
+    await sql`update access_control_settings set rotation_salt = ${rotationSalt}, updated_at = now() where id = 1`;
+  }
+  const rotatingKey = generateRotatingAccessKey(rotationSalt);
   return {
     isEnabled: Boolean(settings?.isEnabled),
-    hasKey: Boolean(settings?.keyHash),
-    keyHash: settings?.keyHash || null,
+    hasKey: true,
+    keyHash: rotatingKey.keyHash,
+    currentKey: rotatingKey.key,
+    keyExpiresAt: rotatingKey.expiresAt.toISOString(),
+    keySecondsRemaining: rotatingKey.secondsRemaining,
+    rotationSalt,
     updatedAt: settings?.updatedAt || null
   };
 }
 
-export async function updateAccessControlSettings(input: { isEnabled?: boolean; accessKey?: string }) {
+export async function updateAccessControlSettings(input: { isEnabled?: boolean; rotateNow?: boolean }) {
   if (!sql) throw new Error("DATABASE_URL is not configured.");
   await ensureSchema();
   const current = await getAccessControlSettings();
-  const nextHash = input.accessKey?.trim() ? hashAccessKey(input.accessKey) : current.keyHash || null;
-
-  if (input.isEnabled && !nextHash) {
-    throw new Error("Please set an access key before enabling protection.");
-  }
+  const nextSalt = input.rotateNow ? createAccessRotationSalt() : current.rotationSalt || createAccessRotationSalt();
 
   const [settings] = await sql<any[]>`
     update access_control_settings
     set
       is_enabled = coalesce(${input.isEnabled ?? null}, is_enabled),
-      key_hash = ${nextHash},
+      key_hash = null,
+      rotation_salt = ${nextSalt},
       updated_at = now()
     where id = 1
     returning
       is_enabled as "isEnabled",
       key_hash as "keyHash",
+      rotation_salt as "rotationSalt",
       updated_at::text as "updatedAt"
   `;
+  const rotatingKey = generateRotatingAccessKey(settings.rotationSalt);
 
   return {
     isEnabled: Boolean(settings.isEnabled),
-    hasKey: Boolean(settings.keyHash),
-    keyHash: settings.keyHash,
+    hasKey: true,
+    keyHash: rotatingKey.keyHash,
+    currentKey: rotatingKey.key,
+    keyExpiresAt: rotatingKey.expiresAt.toISOString(),
+    keySecondsRemaining: rotatingKey.secondsRemaining,
+    rotationSalt: settings.rotationSalt,
     updatedAt: settings.updatedAt
   } satisfies AccessControlSettings;
 }

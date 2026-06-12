@@ -69,6 +69,10 @@ export type AccessControlSettings = {
   isEnabled: boolean;
   hasKey: boolean;
   keyHash?: string | null;
+  currentKey?: string | null;
+  keyExpiresAt?: string | null;
+  keySecondsRemaining?: number;
+  rotationSalt?: string | null;
   updatedAt?: string | null;
 };
 

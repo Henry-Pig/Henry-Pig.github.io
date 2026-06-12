@@ -697,6 +697,37 @@ html[data-design] {
   accent-color: var(--primary);
 }
 
+.access-current-key {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  background: var(--surface-dark);
+  color: var(--on-dark-soft);
+  padding: 18px;
+}
+
+.access-current-key span,
+.access-current-key small {
+  color: var(--on-dark-soft);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.access-current-key strong {
+  color: var(--on-dark);
+  font-family: var(--mono-font);
+  font-size: clamp(28px, 5vw, 42px);
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.access-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .access-gate {
   margin: 24px 0;
 }

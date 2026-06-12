@@ -6,6 +6,9 @@ function publicSettings(settings: Awaited<ReturnType<typeof getAccessControlSett
   return {
     isEnabled: settings.isEnabled,
     hasKey: settings.hasKey,
+    currentKey: settings.currentKey,
+    keyExpiresAt: settings.keyExpiresAt,
+    keySecondsRemaining: settings.keySecondsRemaining,
     updatedAt: settings.updatedAt
   };
 }
@@ -34,7 +37,7 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const settings = await updateAccessControlSettings({
       isEnabled: typeof body.isEnabled === "boolean" ? body.isEnabled : undefined,
-      accessKey: typeof body.accessKey === "string" ? body.accessKey : undefined
+      rotateNow: Boolean(body.rotateNow)
     });
     return NextResponse.json({ success: true, data: publicSettings(settings), error: null });
   } catch (error) {
