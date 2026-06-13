@@ -2213,7 +2213,7 @@ h2 {
   position: relative;
   left: 50%;
   width: 100vw;
-  min-height: clamp(190px, 28vw, 340px);
+  min-height: clamp(260px, 34vw, 460px);
   margin: 0 0 54px;
   overflow: hidden;
   background: var(--surface-dark);
