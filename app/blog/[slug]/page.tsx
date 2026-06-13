@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { ACCESS_COOKIE_NAME, hasValidAccessCookie } from "../../../lib/accessControl";
+import { ADMIN_COOKIE_NAME, hasValidAdminCookie } from "../../../lib/adminAuth";
 import { AccessKeyGate } from "../../../components/AccessKeyGate";
 import { Nav } from "../../../components/Nav";
 import { MarkdownView } from "../../../components/MarkdownView";
@@ -35,7 +36,7 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
 
   const settings = await getAccessControlSettings();
   const cookieStore = await cookies();
-  const hasAccess = hasValidAccessCookie(settings, cookieStore.get(ACCESS_COOKIE_NAME)?.value);
+  const hasAccess = hasValidAdminCookie(cookieStore.get(ADMIN_COOKIE_NAME)?.value) || hasValidAccessCookie(settings, cookieStore.get(ACCESS_COOKIE_NAME)?.value);
 
   if (!hasAccess) {
     return (

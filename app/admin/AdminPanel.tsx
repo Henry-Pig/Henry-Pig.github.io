@@ -52,7 +52,8 @@ export function AdminPanel() {
     await verify(token);
   }
 
-  function logout() {
+  async function logout() {
+    await fetch("/api/auth", { method: "DELETE" }).catch(() => null);
     localStorage.removeItem("admin-token");
     setToken("");
     setAuthState("anonymous");
