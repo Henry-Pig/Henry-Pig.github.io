@@ -49,7 +49,8 @@ function useAdmin() {
     return verify(nextToken);
   }
 
-  function logout() {
+  async function logout() {
+    await fetch("/api/auth", { method: "DELETE" }).catch(() => null);
     localStorage.removeItem("admin-token");
     setToken("");
     setIsAdmin(false);
