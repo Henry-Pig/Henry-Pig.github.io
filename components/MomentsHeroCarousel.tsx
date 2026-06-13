@@ -22,7 +22,7 @@ export function MomentsHeroCarousel() {
 
   return (
     <div className="moments-hero-banner">
-      <img className="moments-banner-image" src={activeImage.src} alt={activeImage.alt} />
+      <img key={activeImage.src} className="moments-banner-image" src={activeImage.src} alt={activeImage.alt} />
       <button className="moments-banner-button moments-banner-prev" type="button" onClick={goPrevious} aria-label="上一张背景图">
         ‹
       </button>

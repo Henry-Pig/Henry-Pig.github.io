@@ -1954,6 +1954,16 @@ h2 {
   font-weight: 500;
   line-height: 1;
   padding: 12px 20px;
+  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(64, 48, 34, 0.1);
+}
+
+.button:active {
+  transform: translateY(0);
 }
 
 .button-primary {
@@ -2159,6 +2169,21 @@ h2 {
   border-radius: 12px;
   background: var(--surface-card);
   padding: 28px;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.feature-card,
+.project-card {
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.life-item:hover,
+.blog-card:hover,
+.feature-card:hover,
+.project-card:hover {
+  border-color: rgba(204, 120, 92, 0.34);
+  box-shadow: 0 18px 54px rgba(64, 48, 34, 0.1);
+  transform: translateY(-2px);
 }
 
 .life-item h2,
@@ -2194,6 +2219,7 @@ h2 {
   background: var(--surface-dark);
   box-shadow: var(--shadow);
   transform: translateX(-50%);
+  isolation: isolate;
 }
 
 .moments-hero-banner::before {
@@ -2214,8 +2240,10 @@ h2 {
   inset: 0;
   width: 100%;
   height: 100%;
+  animation: moments-banner-reveal 680ms cubic-bezier(0.22, 1, 0.36, 1) both;
   object-fit: cover;
   object-position: center;
+  transform-origin: center;
 }
 
 .moments-banner-button {
@@ -2233,11 +2261,18 @@ h2 {
   cursor: pointer;
   font: 400 30px / 1 var(--display-font);
   transform: translateY(-50%);
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease, opacity 180ms ease;
   backdrop-filter: blur(10px);
 }
 
 .moments-banner-button:hover {
   background: rgba(204, 120, 92, 0.72);
+  border-color: rgba(255, 250, 240, 0.5);
+  transform: translateY(-50%) scale(1.06);
+}
+
+.moments-banner-button:active {
+  transform: translateY(-50%) scale(0.97);
 }
 
 .moments-banner-prev {
@@ -2266,6 +2301,12 @@ h2 {
   background: rgba(255, 255, 255, 0.42);
   cursor: pointer;
   padding: 0;
+  transition: width 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.moments-banner-dots button:hover {
+  background: rgba(255, 255, 255, 0.72);
+  transform: translateY(-1px);
 }
 
 .moments-banner-dots button.is-active {
@@ -2303,6 +2344,20 @@ h2 {
     var(--soft-card);
   box-shadow: var(--shadow);
   padding: 20px;
+  animation: moments-panel-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.guest-bottle {
+  animation-delay: 80ms;
+}
+
+.daily-status-card:hover,
+.guest-bottle:hover,
+.moment-post:hover {
+  border-color: rgba(204, 120, 92, 0.36);
+  box-shadow: 0 22px 70px rgba(64, 48, 34, 0.12);
+  transform: translateY(-2px);
 }
 
 .daily-status-card h2,
@@ -2334,6 +2389,7 @@ h2 {
   background:
     radial-gradient(circle, var(--primary) 0 8px, transparent 9px),
     conic-gradient(from 45deg, transparent 0 22%, rgba(204, 120, 92, 0.26) 22% 38%, transparent 38% 100%);
+  animation: status-orbit-breathe 4.8s ease-in-out infinite;
 }
 
 .status-orbit span {
@@ -2354,6 +2410,13 @@ h2 {
   font-family: var(--mono-font);
   font-size: 12px;
   padding: 6px 10px;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.daily-status-card:hover .status-badge {
+  background: var(--primary);
+  color: var(--on-primary);
+  transform: translateX(3px);
 }
 
 .guest-bottle-form {
@@ -2401,6 +2464,12 @@ h2 {
   background: var(--canvas);
   border-radius: 10px;
   padding: 10px 12px;
+  transition: border-color 180ms ease, transform 180ms ease, background 180ms ease;
+}
+
+.guest-message-item:hover {
+  background: var(--surface-card);
+  transform: translateX(3px);
 }
 
 .guest-message-item strong {
@@ -2466,6 +2535,8 @@ h2 {
   border-radius: 12px;
   background: rgba(250, 249, 245, 0.72);
   padding: 22px;
+  animation: moments-panel-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .moment-meta {
@@ -2482,6 +2553,42 @@ h2 {
 .moment-post p {
   color: var(--body-strong);
   font-size: 17px;
+}
+
+@keyframes moments-banner-reveal {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: scale(1.035) translateX(18px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1) translateX(0);
+  }
+}
+
+@keyframes moments-panel-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes status-orbit-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(204, 120, 92, 0);
+  }
+  50% {
+    transform: scale(1.035);
+    box-shadow: 0 0 28px rgba(204, 120, 92, 0.16);
+  }
 }
 
 .side-panel ul,
