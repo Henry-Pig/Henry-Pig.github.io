@@ -1,6 +1,7 @@
 import { Nav } from "../../../components/Nav";
 import { DailyStatusSign } from "../../../components/DailyStatusSign";
 import { GuestMessageBottle } from "../../../components/GuestMessageBottle";
+import { MomentsHeroCarousel } from "../../../components/MomentsHeroCarousel";
 import { MomentsManager } from "../../../components/content/ContentManagers";
 import { getSiteData } from "../../../lib/db";
 
@@ -14,11 +15,7 @@ export default async function MomentsPage() {
       <Nav active="life" lifeActive="moments" />
       <main className="page-main">
         <section className="page-hero shell">
-          <div className="moments-hero-banner" aria-hidden="true">
-            <span className="moments-banner-strip moments-banner-one" />
-            <span className="moments-banner-strip moments-banner-two" />
-            <span className="moments-banner-strip moments-banner-three" />
-          </div>
+          <MomentsHeroCarousel />
           <div className="section-heading">
             <p className="eyebrow">Moments</p>
             <h1 data-en="Recent Traces" data-zh="一些最近的痕迹">一些最近的痕迹</h1>

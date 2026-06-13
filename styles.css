@@ -2186,18 +2186,14 @@ h2 {
 
 .moments-hero-banner {
   position: relative;
-  display: grid;
-  gap: 16px;
-  max-width: 960px;
-  margin: 0 auto 44px;
+  left: 50%;
+  width: 100vw;
+  min-height: clamp(190px, 28vw, 340px);
+  margin: 0 0 54px;
   overflow: hidden;
-  border: 1px solid var(--hairline-soft);
-  border-radius: 20px;
-  background:
-    radial-gradient(circle at 18% 0%, rgba(204, 120, 92, 0.2), transparent 36%),
-    linear-gradient(180deg, var(--surface-dark-soft), var(--surface-dark));
-  padding: 16px;
+  background: var(--surface-dark);
   box-shadow: var(--shadow);
+  transform: translateX(-50%);
 }
 
 .moments-hero-banner::before {
@@ -2205,49 +2201,76 @@ h2 {
   inset: 0;
   z-index: 1;
   background:
-    linear-gradient(90deg, var(--surface-dark) 0%, transparent 9%, transparent 91%, var(--surface-dark) 100%),
-    linear-gradient(180deg, var(--surface-dark) 0%, transparent 14%, transparent 86%, var(--surface-dark) 100%);
+    linear-gradient(90deg, var(--canvas) 0%, transparent 9%, transparent 91%, var(--canvas) 100%),
+    linear-gradient(180deg, var(--canvas) 0%, transparent 18%, transparent 82%, var(--canvas) 100%),
+    radial-gradient(circle at center, transparent 42%, rgba(0, 0, 0, 0.3) 100%);
   content: "";
-  opacity: 0.58;
+  opacity: 0.76;
   pointer-events: none;
 }
 
-.moments-banner-strip {
-  position: relative;
-  min-height: 112px;
-  overflow: hidden;
-  border-radius: 14px;
-  background-color: var(--surface-dark-elevated);
-  background-position: center;
-  background-size: cover;
-}
-
-.moments-banner-strip::after {
+.moments-banner-image {
   position: absolute;
-  inset: -1px;
-  background:
-    radial-gradient(circle at center, transparent 38%, rgba(0, 0, 0, 0.32) 100%),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.42), transparent 15%, transparent 85%, rgba(0, 0, 0, 0.42));
-  box-shadow: inset 0 0 32px rgba(0, 0, 0, 0.52);
-  content: "";
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
-.moments-banner-one {
-  background-image:
-    linear-gradient(135deg, rgba(20, 20, 19, 0.2), rgba(204, 120, 92, 0.16)),
-    url("/moments-banners/tiga-1.png");
+.moments-banner-button {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.42);
+  color: #fffaf0;
+  cursor: pointer;
+  font: 400 30px / 1 var(--display-font);
+  transform: translateY(-50%);
+  backdrop-filter: blur(10px);
 }
 
-.moments-banner-two {
-  background-image:
-    linear-gradient(135deg, rgba(20, 20, 19, 0.18), rgba(93, 184, 166, 0.14)),
-    url("/moments-banners/tiga-2.png");
+.moments-banner-button:hover {
+  background: rgba(204, 120, 92, 0.72);
 }
 
-.moments-banner-three {
-  background-image:
-    linear-gradient(135deg, rgba(20, 20, 19, 0.18), rgba(201, 168, 106, 0.14)),
-    url("/moments-banners/tiga-3.png");
+.moments-banner-prev {
+  left: max(18px, calc((100vw - 1200px) / 2 + 18px));
+}
+
+.moments-banner-next {
+  right: max(18px, calc((100vw - 1200px) / 2 + 18px));
+}
+
+.moments-banner-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  z-index: 2;
+  display: flex;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+
+.moments-banner-dots button {
+  width: 9px;
+  height: 9px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
+  cursor: pointer;
+  padding: 0;
+}
+
+.moments-banner-dots button.is-active {
+  width: 24px;
+  background: var(--primary);
 }
 
 .moments-side {
