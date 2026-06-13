@@ -3,7 +3,7 @@
 import { PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { MusicTrack } from "../lib/types";
 
-type PlayMode = "order" | "single" | "loop";
+type PlayMode = "shuffle" | "single" | "loop";
 
 type ApiResult<T> = {
   success: boolean;
@@ -52,7 +52,7 @@ export function FloatingMusicPlayer() {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   const modeLabel = useMemo(() => ({
-    order: { zh: "顺序播放", en: "Order" },
+    shuffle: { zh: "随机播放", en: "Shuffle" },
     single: { zh: "单曲循环", en: "Repeat One" },
     loop: { zh: "列表循环", en: "Loop" }
   })[mode], [mode]);
@@ -83,7 +83,8 @@ export function FloatingMusicPlayer() {
     }
 
     if (Number.isFinite(savedVolume)) setVolume(clamp(savedVolume, 0, 1));
-    if (savedMode === "order" || savedMode === "single" || savedMode === "loop") setMode(savedMode);
+    if (savedMode === "shuffle" || savedMode === "single" || savedMode === "loop") setMode(savedMode);
+    else if (savedMode === "order") setMode("shuffle");
     if (savedExpanded === "true") setExpanded(true);
   }, []);
 
@@ -139,10 +140,6 @@ export function FloatingMusicPlayer() {
       if (mode === "single") {
         audio.currentTime = 0;
         audio.play().catch(() => setPlaying(false));
-        return;
-      }
-      if (mode === "order" && index >= tracks.length - 1) {
-        setPlaying(false);
         return;
       }
       goNext(true);
@@ -218,11 +215,20 @@ export function FloatingMusicPlayer() {
 
   function goPrevious() {
     if (!tracks.length) return;
+    if (mode === "shuffle") {
+      setIndex((current) => getRandomTrackIndex(current));
+      return;
+    }
     setIndex((current) => (current <= 0 ? tracks.length - 1 : current - 1));
   }
 
   function goNext(forcePlay = false) {
     if (!tracks.length) return;
+    if (mode === "shuffle") {
+      setIndex((current) => getRandomTrackIndex(current));
+      if (forcePlay) setPlaying(true);
+      return;
+    }
     setIndex((current) => {
       const next = current >= tracks.length - 1 ? 0 : current + 1;
       return next;
@@ -239,7 +245,16 @@ export function FloatingMusicPlayer() {
   }
 
   function cycleMode() {
-    setMode((current) => current === "order" ? "single" : current === "single" ? "loop" : "order");
+    setMode((current) => current === "shuffle" ? "single" : current === "single" ? "loop" : "shuffle");
+  }
+
+  function getRandomTrackIndex(current: number) {
+    if (tracks.length <= 1) return current;
+    let next = current;
+    while (next === current) {
+      next = Math.floor(Math.random() * tracks.length);
+    }
+    return next;
   }
 
   function selectTrack(nextIndex: number) {

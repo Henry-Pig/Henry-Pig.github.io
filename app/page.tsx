@@ -19,8 +19,8 @@ export default function HomePage() {
               <span key={index} style={{ "--d": `${Math.abs(index - 3) * 0.16}s` } as React.CSSProperties}>{letter}</span>
             ))}
           </h1>
-          <p className="home-subtitle" data-en="Yu Shuheng · Computer Science Student · Algorithms / Projects / Graduate Recommendation" data-zh="于书蘅 · 计算机学生 · 算法 / 项目展示 / 保研准备">
-            于书蘅 · 计算机学生 · 算法 / 项目展示 / 保研准备
+          <p className="home-subtitle" data-en="The light I lent Ultraman Tiga that year still has not been returned." data-zh="那一年借给迪迦奥特曼的光至今没有还给我">
+            那一年借给迪迦奥特曼的光至今没有还给我
           </p>
           <div className="home-actions">
             <Link className="button button-primary home-enter" href="/about" data-en="About" data-zh="关于我">关于我</Link>

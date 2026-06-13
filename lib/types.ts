@@ -43,11 +43,19 @@ export type BlogPost = {
   createdAt?: string | null;
 };
 
+export type GuestMessage = {
+  id: number | string;
+  nickname: string;
+  message: string;
+  createdAt?: string | null;
+};
+
 export type SiteData = {
   moments: Moment[];
   todos: TodoItem[];
   works: WorkItem[];
   blogPosts: BlogPost[];
+  guestMessages?: GuestMessage[];
 };
 
 export type MusicTrack = {

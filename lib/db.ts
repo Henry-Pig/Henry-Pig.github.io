@@ -2,7 +2,7 @@ import postgres from "postgres";
 import { createAccessRotationSalt, generateRotatingAccessKey } from "./accessControl";
 import { defaultProjects } from "./project-data";
 import { seedData } from "./seed";
-import type { AccessControlSettings, BlogPost, Moment, MusicTrack, ProjectItem, SiteData, TodoItem, WorkItem } from "./types";
+import type { AccessControlSettings, BlogPost, GuestMessage, Moment, MusicTrack, ProjectItem, SiteData, TodoItem, WorkItem } from "./types";
 
 const connectionString = process.env.DATABASE_URL;
 const sql = connectionString ? postgres(connectionString, { ssl: "require" }) : null;
@@ -127,6 +127,16 @@ async function ensureSchema() {
   await sql`alter table access_control_settings add column if not exists rotation_salt text`;
 
   await sql`
+    create table if not exists guest_messages (
+      id serial primary key,
+      nickname text not null,
+      message text not null,
+      is_visible boolean not null default true,
+      created_at timestamptz not null default now()
+    )
+  `;
+
+  await sql`
     insert into access_control_settings (id, is_enabled, key_hash, rotation_salt)
     values (1, false, null, ${createAccessRotationSalt()})
     on conflict (id) do nothing
@@ -220,7 +230,7 @@ export async function getSiteData(): Promise<SiteData> {
 
   await ensureSchema();
 
-  const [moments, todos, works, blogPosts] = await Promise.all([
+  const [moments, todos, works, blogPosts, guestMessages] = await Promise.all([
     sql<Moment[]>`
       select
         id,
@@ -268,6 +278,17 @@ export async function getSiteData(): Promise<SiteData> {
         created_at::text as "createdAt"
       from blog_posts
       order by created_at desc, id desc
+    `,
+    sql<GuestMessage[]>`
+      select
+        id,
+        nickname,
+        message,
+        created_at::text as "createdAt"
+      from guest_messages
+      where is_visible = true
+      order by created_at desc, id desc
+      limit 8
     `
   ]);
 
@@ -275,7 +296,8 @@ export async function getSiteData(): Promise<SiteData> {
     moments: moments.length ? moments : seedData.moments,
     todos: todos.length ? todos : seedData.todos,
     works: works.length ? works : seedData.works,
-    blogPosts: blogPosts.length ? blogPosts : seedData.blogPosts
+    blogPosts: blogPosts.length ? blogPosts : seedData.blogPosts,
+    guestMessages
   };
 }
 
@@ -480,6 +502,37 @@ export async function deleteMusicTrack(id: number | string) {
   `;
   if (!deleted) throw new Error("Music track not found.");
   return deleted as { id: number; url: string };
+}
+
+export async function getGuestMessages() {
+  if (!sql) return [];
+  await ensureSchema();
+  return sql<GuestMessage[]>`
+    select
+      id,
+      nickname,
+      message,
+      created_at::text as "createdAt"
+    from guest_messages
+    where is_visible = true
+    order by created_at desc, id desc
+    limit 8
+  `;
+}
+
+export async function createGuestMessage(input: { nickname: string; message: string }) {
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureSchema();
+  const [message] = await sql<GuestMessage[]>`
+    insert into guest_messages (nickname, message)
+    values (${input.nickname}, ${input.message})
+    returning
+      id,
+      nickname,
+      message,
+      created_at::text as "createdAt"
+  `;
+  return message;
 }
 
 export async function createMoment(input: Omit<Moment, "id">) {
