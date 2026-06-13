@@ -7,6 +7,7 @@ import {
   deleteContent,
   getSiteData,
   hasDatabase,
+  updateBlogPost,
   updateTodoStatus,
   updateWork
 } from "../../../lib/db";
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
       tag: body.tag || "生活",
       content: body.content,
       imageUrl: body.imageUrl || null,
+      imageUrls: Array.isArray(body.imageUrls) ? body.imageUrls.filter(Boolean) : [],
       linkUrl: body.linkUrl || null
     });
     } else if (body.type === "todo") {
@@ -131,6 +133,21 @@ export async function PATCH(request: Request) {
         status: body.status,
         note: body.note,
         reflection: body.reflection
+      });
+      return NextResponse.json({ success: true, data, error: null });
+    }
+
+    if (body.type === "blog") {
+      if (!body.id || !body.title || !body.summary) {
+        return NextResponse.json({ success: false, data: null, error: "Blog id, title, and summary are required." }, { status: 400 });
+      }
+      const data = await updateBlogPost(body.id, {
+        title: body.title,
+        slug: body.slug || slugify(body.title),
+        category: body.category || "随笔",
+        summary: body.summary,
+        content: body.content || null,
+        coverImageUrl: body.coverImageUrl || null
       });
       return NextResponse.json({ success: true, data, error: null });
     }

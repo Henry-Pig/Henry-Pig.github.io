@@ -5,6 +5,7 @@ export type Moment = {
   tag: string;
   content: string;
   imageUrl?: string | null;
+  imageUrls?: string[] | null;
   linkUrl?: string | null;
   createdAt?: string | null;
 };
@@ -41,6 +42,7 @@ export type BlogPost = {
   content?: string | null;
   coverImageUrl?: string | null;
   createdAt?: string | null;
+  updatedAt?: string | null;
 };
 
 export type GuestMessage = {

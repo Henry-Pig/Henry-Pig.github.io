@@ -18,6 +18,7 @@ async function ensureSchema() {
       tag text not null,
       content text not null,
       image_url text,
+      image_urls jsonb not null default '[]'::jsonb,
       link_url text,
       created_at timestamptz not null default now()
     )
@@ -25,7 +26,15 @@ async function ensureSchema() {
 
   await sql`alter table moments add column if not exists title text`;
   await sql`alter table moments add column if not exists image_url text`;
+  await sql`alter table moments add column if not exists image_urls jsonb not null default '[]'::jsonb`;
   await sql`alter table moments add column if not exists link_url text`;
+  await sql`
+    update moments
+    set image_urls = jsonb_build_array(image_url)
+    where image_url is not null
+      and image_url <> ''
+      and image_urls = '[]'::jsonb
+  `;
 
   await sql`
     create table if not exists todos (
@@ -74,6 +83,7 @@ async function ensureSchema() {
   `;
 
   await sql`alter table blog_posts add column if not exists cover_image_url text`;
+  await sql`alter table blog_posts add column if not exists updated_at timestamptz not null default now()`;
 
   await sql`
     create table if not exists projects (
@@ -239,6 +249,7 @@ export async function getSiteData(): Promise<SiteData> {
         tag,
         content,
         image_url as "imageUrl",
+        image_urls as "imageUrls",
         link_url as "linkUrl",
         created_at::text as "createdAt"
       from moments
@@ -275,7 +286,8 @@ export async function getSiteData(): Promise<SiteData> {
         summary,
         content,
         cover_image_url as "coverImageUrl",
-        created_at::text as "createdAt"
+        created_at::text as "createdAt",
+        updated_at::text as "updatedAt"
       from blog_posts
       order by created_at desc, id desc
     `,
@@ -538,9 +550,10 @@ export async function createGuestMessage(input: { nickname: string; message: str
 export async function createMoment(input: Omit<Moment, "id">) {
   if (!sql) throw new Error("DATABASE_URL is not configured.");
   await ensureSchema();
+  const imageUrls = input.imageUrls?.filter(Boolean) || (input.imageUrl ? [input.imageUrl] : []);
   const [moment] = await sql<Moment[]>`
-    insert into moments (title, date, tag, content, image_url, link_url)
-    values (${input.title || null}, ${input.date}, ${input.tag}, ${input.content}, ${input.imageUrl || null}, ${input.linkUrl || null})
+    insert into moments (title, date, tag, content, image_url, image_urls, link_url)
+    values (${input.title || null}, ${input.date}, ${input.tag}, ${input.content}, ${imageUrls[0] || null}, ${sql.json(imageUrls)}, ${input.linkUrl || null})
     returning
       id,
       title,
@@ -548,6 +561,7 @@ export async function createMoment(input: Omit<Moment, "id">) {
       tag,
       content,
       image_url as "imageUrl",
+      image_urls as "imageUrls",
       link_url as "linkUrl",
       created_at::text as "createdAt"
   `;
@@ -624,6 +638,65 @@ export async function createBlogPost(input: Omit<BlogPost, "id">) {
       created_at::text as "createdAt"
   `;
   return post;
+}
+
+export async function updateBlogPost(id: number | string, input: Partial<Pick<BlogPost, "title" | "slug" | "category" | "summary" | "content" | "coverImageUrl">>) {
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureSchema();
+
+  let nextSlug = input.slug;
+  if (nextSlug) {
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      const candidate = attempt === 0 ? nextSlug : `${nextSlug}-${attempt + 1}`;
+      const [existing] = await sql<{ id: number }[]>`
+        select id from blog_posts
+        where slug = ${candidate} and id <> ${Number(id)}
+        limit 1
+      `;
+      if (!existing) {
+        nextSlug = candidate;
+        break;
+      }
+    }
+  }
+
+  const [post] = await sql<BlogPost[]>`
+    update blog_posts
+    set
+      title = coalesce(${input.title ?? null}, title),
+      slug = coalesce(${nextSlug ?? null}, slug),
+      category = coalesce(${input.category ?? null}, category),
+      summary = coalesce(${input.summary ?? null}, summary),
+      content = case when ${input.content === undefined} then content else ${input.content ?? null} end,
+      cover_image_url = case when ${input.coverImageUrl === undefined} then cover_image_url else ${input.coverImageUrl ?? null} end,
+      updated_at = now()
+    where id = ${Number(id)}
+    returning
+      id,
+      title,
+      slug,
+      date,
+      category,
+      summary,
+      content,
+      cover_image_url as "coverImageUrl",
+      created_at::text as "createdAt",
+      updated_at::text as "updatedAt"
+  `;
+  if (!post) throw new Error("Blog post not found.");
+  return post;
+}
+
+export async function deleteGuestMessage(id: number | string) {
+  if (!sql) throw new Error("DATABASE_URL is not configured.");
+  await ensureSchema();
+  const [deleted] = await sql<{ id: number }[]>`
+    delete from guest_messages
+    where id = ${Number(id)}
+    returning id
+  `;
+  if (!deleted) throw new Error("Guest message not found.");
+  return deleted;
 }
 
 export async function updateTodoStatus(id: number, status: TodoItem["status"]) {

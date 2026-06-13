@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createGuestMessage, getGuestMessages, hasDatabase } from "../../../lib/db";
+import { adminUnauthorizedResponse, isAdminRequest } from "../../../lib/adminAuth";
+import { createGuestMessage, deleteGuestMessage, getGuestMessages, hasDatabase } from "../../../lib/db";
 
 export async function GET() {
   try {
@@ -33,6 +34,37 @@ export async function POST(request: Request) {
     }
 
     const data = await createGuestMessage({ nickname, message });
+    return NextResponse.json({ success: true, data, error: null });
+  } catch (error) {
+    return NextResponse.json({
+      success: false,
+      data: null,
+      error: error instanceof Error ? error.message : "Unexpected server error."
+    }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    if (!isAdminRequest(request)) {
+      return NextResponse.json(adminUnauthorizedResponse(), { status: 401 });
+    }
+
+    if (!hasDatabase()) {
+      return NextResponse.json({
+        success: false,
+        data: null,
+        error: "DATABASE_URL is not configured."
+      }, { status: 503 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ success: false, data: null, error: "Message id is required." }, { status: 400 });
+    }
+
+    const data = await deleteGuestMessage(id);
     return NextResponse.json({ success: true, data, error: null });
   } catch (error) {
     return NextResponse.json({

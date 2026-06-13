@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { GuestMessage } from "../lib/types";
 
@@ -14,6 +14,32 @@ export function GuestMessageBottle({ initialMessages }: GuestMessageBottleProps)
   const [message, setMessage] = useState("");
   const [feedback, setFeedback] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [adminToken, setAdminToken] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    function syncAdmin() {
+      const token = localStorage.getItem("admin-token") || "";
+      setAdminToken(token);
+      if (!token) {
+        setIsAdmin(false);
+        return;
+      }
+
+      fetch("/api/auth", { headers: { "x-admin-token": token } })
+        .then((response) => response.json())
+        .then((payload) => setIsAdmin(Boolean(payload.data?.isAdmin)))
+        .catch(() => setIsAdmin(false));
+    }
+
+    syncAdmin();
+    window.addEventListener("admin-auth-change", syncAdmin);
+    window.addEventListener("storage", syncAdmin);
+    return () => {
+      window.removeEventListener("admin-auth-change", syncAdmin);
+      window.removeEventListener("storage", syncAdmin);
+    };
+  }, []);
 
   async function submitMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -46,6 +72,26 @@ export function GuestMessageBottle({ initialMessages }: GuestMessageBottleProps)
     }
   }
 
+  async function removeMessage(item: GuestMessage) {
+    if (!confirm("确定删除这条留言吗？")) return;
+    const previous = messages;
+    setMessages((current) => current.filter((messageItem) => messageItem.id !== item.id));
+    setFeedback("");
+
+    try {
+      const response = await fetch(`/api/guest-messages?id=${encodeURIComponent(String(item.id))}`, {
+        method: "DELETE",
+        headers: { "x-admin-token": adminToken }
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.success) throw new Error(payload.error || "删除失败。");
+      setFeedback("留言已删除。");
+    } catch (error) {
+      setMessages(previous);
+      setFeedback(error instanceof Error ? error.message : "删除失败。");
+    }
+  }
+
   return (
     <div className="guest-bottle">
       <p className="eyebrow">Message Bottle</p>
@@ -74,6 +120,11 @@ export function GuestMessageBottle({ initialMessages }: GuestMessageBottleProps)
             <article className="guest-message-item" key={item.id}>
               <strong>{item.nickname}</strong>
               <p>{item.message}</p>
+              {isAdmin ? (
+                <button className="text-danger guest-message-delete" type="button" onClick={() => removeMessage(item)} data-en="Delete" data-zh="删除">
+                  删除
+                </button>
+              ) : null}
             </article>
           ))
         ) : (

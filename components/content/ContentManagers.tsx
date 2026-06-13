@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import type { BlogPost, Moment, TodoItem, WorkItem } from "../../lib/types";
 
 type ApiResult<T> = {
@@ -10,7 +10,7 @@ type ApiResult<T> = {
   error?: string;
 };
 
-const emptyMoment = { title: "", date: "", tag: "生活", content: "", imageUrl: "", linkUrl: "" };
+const emptyMoment = { title: "", date: "", tag: "生活", content: "", imageUrls: [] as string[], linkUrl: "" };
 const emptyTodo = { category: "想完成的项目", title: "", status: "todo" };
 const emptyWork = { workType: "book", title: "", creator: "", status: "want", date: "", note: "", reflection: "", coverImageUrl: "", blogUrl: "" };
 const emptyBlog = { title: "", slug: "", date: "", category: "随笔", summary: "", content: "", coverImageUrl: "" };
@@ -46,12 +46,14 @@ function useAdmin() {
   function saveToken(nextToken: string) {
     localStorage.setItem("admin-token", nextToken);
     setToken(nextToken);
+    window.dispatchEvent(new Event("admin-auth-change"));
     return verify(nextToken);
   }
 
   async function logout() {
     await fetch("/api/auth", { method: "DELETE" }).catch(() => null);
     localStorage.removeItem("admin-token");
+    window.dispatchEvent(new Event("admin-auth-change"));
     setToken("");
     setIsAdmin(false);
   }
@@ -144,6 +146,25 @@ function LoginModal({ onClose, onSave }: { onClose: () => void; onSave: (token: 
   );
 }
 
+async function uploadImageFile(token: string, file: File, signal?: AbortSignal) {
+  const formData = new FormData();
+  formData.set("file", file);
+
+  const response = await fetch("/api/upload", {
+    method: "POST",
+    headers: { "x-admin-token": token },
+    body: formData,
+    signal
+  });
+  const text = await response.text();
+  const result = text ? JSON.parse(text) as ApiResult<{ url: string }> : { success: false, error: "服务器没有返回内容。" };
+
+  if (!response.ok || !result.success || !result.data?.url) {
+    throw new Error(result.error || "上传失败，也可以先手动粘贴图片 URL。");
+  }
+  return result.data.url;
+}
+
 function ImageField({ token, label, value, onChange, onUploadingChange }: { token: string; label: string; value: string; onChange: (value: string) => void; onUploadingChange?: (uploading: boolean) => void }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
@@ -160,25 +181,10 @@ function ImageField({ token, label, value, onChange, onUploadingChange }: { toke
     const timeout = window.setTimeout(() => controller.abort(), 30000);
 
     try {
-      const formData = new FormData();
-      formData.set("file", file);
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        headers: { "x-admin-token": token },
-        body: formData,
-        signal: controller.signal
-      });
-      const text = await response.text();
-      const result = text ? JSON.parse(text) as ApiResult<{ url: string }> : { success: false, error: "服务器没有返回内容。" };
-
-      if (!response.ok || !result.success || !result.data?.url) {
-        setError(result.error || "上传失败，也可以先手动粘贴图片 URL。");
-        return;
-      }
-      onChange(result.data.url);
+      const url = await uploadImageFile(token, file, controller.signal);
+      onChange(url);
     } catch (error) {
-      setError(error instanceof DOMException && error.name === "AbortError" ? "上传超时，请检查 Vercel Blob 配置，或先粘贴图片 URL。" : "上传失败，请稍后再试，或先粘贴图片 URL。");
+      setError(error instanceof DOMException && error.name === "AbortError" ? "上传超时，请检查 Vercel Blob 配置，或先粘贴图片 URL。" : error instanceof Error ? error.message : "上传失败，请稍后再试，或先粘贴图片 URL。");
     } finally {
       window.clearTimeout(timeout);
       setUploadState(false);
@@ -191,6 +197,59 @@ function ImageField({ token, label, value, onChange, onUploadingChange }: { toke
       <input value={value} onChange={(event) => onChange(event.target.value)} placeholder="图片 URL，或选择文件上传" />
       <input className="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => event.target.files?.[0] && upload(event.target.files[0])} />
       {uploading ? <span className="form-hint" data-en="Uploading image..." data-zh="图片上传中...">图片上传中...</span> : null}
+      {error ? <span className="form-error">{error}</span> : null}
+    </label>
+  );
+}
+
+function MultiImageField({ token, label, values, onChange }: { token: string; label: string; values: string[]; onChange: (value: string[]) => void }) {
+  const [manualUrl, setManualUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
+  function addUrl(url: string) {
+    const cleanUrl = url.trim();
+    if (!cleanUrl) return;
+    onChange([...values, cleanUrl]);
+    setManualUrl("");
+  }
+
+  async function upload(files: FileList) {
+    setUploading(true);
+    setError("");
+    const uploaded: string[] = [];
+
+    try {
+      for (const file of Array.from(files)) {
+        uploaded.push(await uploadImageFile(token, file));
+      }
+      onChange([...values, ...uploaded]);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "上传失败，请稍后再试，或先粘贴图片 URL。");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <label>
+      {label}
+      <div className="multi-image-input-row">
+        <input value={manualUrl} onChange={(event) => setManualUrl(event.target.value)} placeholder="图片 URL，或一次选择多张图片上传" />
+        <button className="button button-secondary" type="button" onClick={() => addUrl(manualUrl)}>添加</button>
+      </div>
+      <input className="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple onChange={(event) => event.target.files && upload(event.target.files)} />
+      {values.length ? (
+        <div className="multi-image-preview">
+          {values.map((url, index) => (
+            <div className="multi-image-preview-item" key={`${url}-${index}`}>
+              <img src={url} alt={`动态图片 ${index + 1}`} />
+              <button type="button" className="text-danger" onClick={() => onChange(values.filter((_, itemIndex) => itemIndex !== index))}>删除</button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {uploading ? <span className="form-hint" data-en="Uploading images..." data-zh="图片上传中...">图片上传中...</span> : null}
       {error ? <span className="form-error">{error}</span> : null}
     </label>
   );
@@ -271,7 +330,13 @@ export function MomentsManager({ initialMoments }: { initialMoments: Moment[] })
             <div className="moment-meta"><time>{moment.date}</time><span>{moment.tag}</span></div>
             {moment.title ? <h2>{moment.title}</h2> : null}
             <p>{moment.content}</p>
-            {moment.imageUrl ? <img className="content-image" src={moment.imageUrl} alt={moment.title || "动态图片"} /> : null}
+            {(moment.imageUrls?.length ? moment.imageUrls : moment.imageUrl ? [moment.imageUrl] : []).length ? (
+              <div className="moment-image-grid">
+                {(moment.imageUrls?.length ? moment.imageUrls : moment.imageUrl ? [moment.imageUrl] : []).map((url, index) => (
+                  <img className="content-image" src={url} alt={`${moment.title || "动态图片"} ${index + 1}`} key={`${url}-${index}`} />
+                ))}
+              </div>
+            ) : null}
             {moment.linkUrl ? <a className="text-link" href={moment.linkUrl}>相关链接</a> : null}
             {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => remove(moment)} data-en="Delete" data-zh="删除">删除</button> : null}
           </article>
@@ -285,7 +350,7 @@ export function MomentsManager({ initialMoments }: { initialMoments: Moment[] })
             <label>日期<input value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} placeholder="留空则使用今天" /></label>
             <label>标签<input value={form.tag} onChange={(event) => setForm({ ...form, tag: event.target.value })} /></label>
             <label>正文<textarea value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} required /></label>
-            <ImageField token={admin.token} label="图片，可选" value={form.imageUrl} onChange={(value) => setForm({ ...form, imageUrl: value })} />
+            <MultiImageField token={admin.token} label="图片，可选，可多张" values={form.imageUrls} onChange={(imageUrls) => setForm({ ...form, imageUrls })} />
             <label>链接，可选<input value={form.linkUrl} onChange={(event) => setForm({ ...form, linkUrl: event.target.value })} /></label>
             <button className="button button-primary" type="submit" data-en="Publish Moment" data-zh="发布动态">发布动态</button>
             {message ? <p className="form-error">{message}</p> : null}
@@ -503,25 +568,85 @@ export function BlogManager({ initialPosts }: { initialPosts: BlogPost[] }) {
   const admin = useAdmin();
   const [posts, setPosts] = useState(initialPosts);
   const [form, setForm] = useState(emptyBlog);
+  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [showLogin, setShowLogin] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   function insertImageMarkdown(url: string) {
-    setForm((current) => ({ ...current, content: `${current.content}\n\n![图片](${url})` }));
+    const markdown = `![图片](${url})`;
+    const textarea = contentTextareaRef.current;
+
+    if (!textarea) {
+      setForm((current) => ({ ...current, content: `${current.content}\n\n${markdown}` }));
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const before = form.content.slice(0, start);
+    const after = form.content.slice(end);
+    const prefix = before && !before.endsWith("\n") ? "\n\n" : "";
+    const suffix = after && !after.startsWith("\n") ? "\n\n" : "";
+    const nextContent = `${before}${prefix}${markdown}${suffix}${after}`;
+    const nextCursor = before.length + prefix.length + markdown.length;
+
+    setForm((current) => ({ ...current, content: nextContent }));
+    window.setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(nextCursor, nextCursor);
+    }, 0);
+  }
+
+  function openCreateForm() {
+    setEditingPost(null);
+    setForm(emptyBlog);
+    setMessage("");
+    setShowForm(true);
+  }
+
+  function openEditForm(post: BlogPost) {
+    setEditingPost(post);
+    setForm({
+      title: post.title,
+      slug: post.slug,
+      date: post.date,
+      category: post.category,
+      summary: post.summary,
+      content: post.content || "",
+      coverImageUrl: post.coverImageUrl || ""
+    });
+    setMessage("");
+    setShowForm(true);
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
     try {
-      const created = await contentRequest<BlogPost>("POST", admin.token, { type: "blog", ...form });
-      setPosts((current) => [created, ...current]);
+      if (editingPost) {
+        const updated = await contentRequest<BlogPost>("PATCH", admin.token, {
+          type: "blog",
+          id: editingPost.id,
+          title: form.title,
+          slug: form.slug,
+          category: form.category,
+          summary: form.summary,
+          content: form.content,
+          coverImageUrl: form.coverImageUrl
+        });
+        setPosts((current) => current.map((post) => post.id === updated.id ? updated : post));
+      } else {
+        const created = await contentRequest<BlogPost>("POST", admin.token, { type: "blog", ...form });
+        setPosts((current) => [created, ...current]);
+      }
       setForm(emptyBlog);
+      setEditingPost(null);
       setShowForm(false);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "发布失败。");
+      setMessage(error instanceof Error ? error.message : "保存失败。");
     }
   }
 
@@ -541,7 +666,7 @@ export function BlogManager({ initialPosts }: { initialPosts: BlogPost[] }) {
   return (
     <>
       <div className="section-action-row">
-        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加博客" actionLabelEn="Add Blog" onAction={() => setShowForm(true)} />
+        <AdminBar isAdmin={admin.isAdmin} onLogin={() => setShowLogin(true)} onLogout={admin.logout} actionLabel="添加博客" actionLabelEn="Add Blog" onAction={openCreateForm} />
       </div>
       <div className="blog-index">
         {posts.length ? posts.map((post) => (
@@ -553,6 +678,7 @@ export function BlogManager({ initialPosts }: { initialPosts: BlogPost[] }) {
               <h2>{post.title}</h2>
               <p>{post.summary}</p>
               <Link className="text-link" href={`/blog/${post.slug}`} data-en="Read More" data-zh="阅读全文">阅读全文</Link>
+              {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => openEditForm(post)} data-en="Edit" data-zh="编辑">编辑</button> : null}
               {admin.isAdmin ? <button className="text-danger" type="button" onClick={() => remove(post)} data-en="Delete" data-zh="删除">删除</button> : null}
             </div>
           </article>
@@ -560,18 +686,19 @@ export function BlogManager({ initialPosts }: { initialPosts: BlogPost[] }) {
       </div>
       {showLogin ? <LoginModal onClose={() => setShowLogin(false)} onSave={admin.saveToken} /> : null}
       {showForm ? (
-        <Modal title="添加博客" onClose={() => setShowForm(false)}>
+        <Modal title={editingPost ? "编辑博客" : "添加博客"} onClose={() => setShowForm(false)}>
           <form className="inline-form" onSubmit={submit}>
             <label>标题<input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} required /></label>
             <label>Slug，可选<input value={form.slug} onChange={(event) => setForm({ ...form, slug: event.target.value })} /></label>
-            <label>日期<input value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} placeholder="留空则使用今天" /></label>
+            <label>日期<input value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} placeholder="留空则使用今天" disabled={Boolean(editingPost)} /></label>
+            {editingPost ? <p className="form-hint">编辑博客不会修改创建日期，博客总览页仍显示这篇文章原来的日期。</p> : null}
             <label>分类<input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} /></label>
             <label>摘要<textarea value={form.summary} onChange={(event) => setForm({ ...form, summary: event.target.value })} required /></label>
             <ImageField token={admin.token} label="封面图，可选" value={form.coverImageUrl} onChange={(value) => setForm({ ...form, coverImageUrl: value })} onUploadingChange={setIsUploading} />
-            <label>正文 Markdown<textarea value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} placeholder="可以写 Markdown，也可以插入图片语法：![说明](图片URL)" /></label>
-            <ImageField token={admin.token} label="正文图片上传，可选" value="" onChange={insertImageMarkdown} onUploadingChange={setIsUploading} />
+            <label>正文 Markdown<textarea ref={contentTextareaRef} value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} placeholder="可以写 Markdown。把光标放到想插图的位置，再上传正文图片。" /></label>
+            <ImageField token={admin.token} label="正文图片上传，插入到当前光标位置" value="" onChange={insertImageMarkdown} onUploadingChange={setIsUploading} />
             <button className="button button-primary" type="submit" disabled={isUploading}>
-              {isUploading ? <span data-en="Waiting for Image Upload" data-zh="等待图片上传">等待图片上传</span> : <span data-en="Publish Blog" data-zh="发布博客">发布博客</span>}
+              {isUploading ? <span data-en="Waiting for Image Upload" data-zh="等待图片上传">等待图片上传</span> : <span data-en={editingPost ? "Save Blog" : "Publish Blog"} data-zh={editingPost ? "保存博客" : "发布博客"}>{editingPost ? "保存博客" : "发布博客"}</span>}
             </button>
             {message ? <p className="form-error">{message}</p> : null}
           </form>
