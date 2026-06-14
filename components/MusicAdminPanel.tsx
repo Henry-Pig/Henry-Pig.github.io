@@ -55,6 +55,24 @@ export function MusicAdminPanel({ token }: { token: string }) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [language, setLanguage] = useState<"zh" | "en">("zh");
+
+  function t(en: string, zh: string) {
+    return language === "en" ? en : zh;
+  }
+
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem("site-language") === "en" ? "en" : "zh";
+    setLanguage(savedLanguage);
+
+    function syncLanguage(event: Event) {
+      const detail = (event as CustomEvent<{ lang?: string }>).detail;
+      setLanguage(detail?.lang === "en" ? "en" : "zh");
+    }
+
+    document.addEventListener("site-language-change", syncLanguage);
+    return () => document.removeEventListener("site-language-change", syncLanguage);
+  }, []);
 
   async function loadTracks(forceAutoSort = false) {
     if (!token) return;
@@ -219,11 +237,11 @@ export function MusicAdminPanel({ token }: { token: string }) {
             <div className="music-admin-meta">
               <span>{track.filename || "-"}</span>
               <span>{formatBytes(track.sizeBytes)}</span>
-              <span data-en={track.isEnabled ? "Enabled" : "Disabled"} data-zh={track.isEnabled ? "启用" : "禁用"}>{track.isEnabled ? "启用" : "禁用"}</span>
+              <span>{track.isEnabled ? t("Enabled", "启用") : t("Disabled", "禁用")}</span>
             </div>
             <div className="music-admin-actions">
               <button className="button button-secondary" type="button" onClick={() => setPreviewUrl(track.url)} data-en="Preview" data-zh="试听">试听</button>
-              <button className="button button-secondary" type="button" onClick={() => update(track, { ...track, isEnabled: !track.isEnabled })} data-en={track.isEnabled ? "Disabled" : "Enabled"} data-zh={track.isEnabled ? "禁用" : "启用"}>{track.isEnabled ? "禁用" : "启用"}</button>
+              <button className="button button-secondary" type="button" onClick={() => update(track, { ...track, isEnabled: !track.isEnabled })}>{track.isEnabled ? t("Disable", "禁用") : t("Enable", "启用")}</button>
               <button className="button button-primary" type="button" onClick={() => update(track, track)} data-en="Save" data-zh="保存">保存</button>
               <button className="text-danger" type="button" onClick={() => remove(track)} data-en="Delete" data-zh="删除">删除</button>
             </div>
